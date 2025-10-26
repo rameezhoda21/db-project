@@ -1,23 +1,26 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
+import { initDB } from "./config/db.js";
 
-import authRoutes from "./routes/auth.js";
-import studentRoutes from "./routes/student.js";
-import librarianRoutes from "./routes/librarian.js";
-import adminRoutes from "./routes/admin.js";
-
-dotenv.config();
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/student", studentRoutes);
-app.use("/api/librarian", librarianRoutes);
-app.use("/api/admin", adminRoutes);
+// Initialize DB pool
+await initDB();
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+// Routes
+import authRoutes from "./routes/auth.js";
+app.use("/api/auth", authRoutes);
+
+// Test route
+app.get("/api/testdb", async (req, res) => {
+  try {
+    const result = await query("SELECT 'Connected to Oracle!' AS message FROM dual");
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(5000, () => console.log("🚀 Server running on port 5000"));

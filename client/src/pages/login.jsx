@@ -14,7 +14,9 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post("/auth/login", { erpId, password, role });
+      const endpoint =
+        role === "student" ? "/auth/student" : "/auth/librarian";
+      const res = await api.post(endpoint, { erpId, password });
       login(res.data);
 
       if (role === "student") navigate("/student");
@@ -54,22 +56,20 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setRole("student")}
-              className={`px-4 py-2 rounded-full font-semibold text-sm transition ${
-                role === "student"
+              className={`px-4 py-2 rounded-full font-semibold text-sm transition ${role === "student"
                   ? "bg-iba-red text-white shadow"
                   : "text-gray-700 hover:bg-gray-200"
-              }`}
+                }`}
             >
               Student
             </button>
             <button
               type="button"
               onClick={() => setRole("librarian")}
-              className={`px-4 py-2 rounded-full font-semibold text-sm transition ${
-                role === "librarian"
+              className={`px-4 py-2 rounded-full font-semibold text-sm transition ${role === "librarian"
                   ? "bg-iba-red text-white shadow"
                   : "text-gray-700 hover:bg-gray-200"
-              }`}
+                }`}
             >
               Librarian
             </button>
