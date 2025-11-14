@@ -9,9 +9,9 @@ router.post("/student", async (req, res) => {
   try {
     const result = await query(
       `SELECT erp_id, first_name, last_name, email 
-       FROM STUDENTS 
-       WHERE erp_id = :erp AND pass = :pw`,
-      [erpId, password]
+   FROM STUDENTS 
+   WHERE erp_id = :erp AND pass = :pw`,
+      { erp: erpId, pw: password }
     );
 
     if (result.rows.length === 0)
@@ -26,23 +26,25 @@ router.post("/student", async (req, res) => {
 
 // ===== Librarian Login =====
 router.post("/librarian", async (req, res) => {
-  const { erpId, password } = req.body; // `erpId` field is reused for username/email input
+  const { erpId, password } = req.body; // erpId is actually librarian_id (numeric)
   try {
     const result = await query(
-      `SELECT librarian_id, first_name, last_name, email 
-       FROM LIBRARIAN 
-       WHERE email = :em AND pass = :pw`,
-      [erpId, password]
+      `SELECT librarian_id, first_name, last_name, email
+       FROM LIBRARIAN
+       WHERE librarian_id = :id AND pass = :pw`,
+      { id: erpId, pw: password }
     );
 
     if (result.rows.length === 0)
-      return res.status(401).json({ error: "Invalid email or password" });
+      return res.status(401).json({ error: "Invalid ID or password" });
 
     const user = result.rows[0];
     res.json({ message: "Login successful", user, role: "librarian" });
   } catch (err) {
+    console.error("❌ Librarian login error:", err);
     res.status(500).json({ error: err.message });
   }
 });
+
 
 export default router;

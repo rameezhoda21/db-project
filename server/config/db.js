@@ -30,11 +30,17 @@ export async function initDB() {
 }
 
 // --- Query Helper Function ---
-export async function query(sql, params = []) {
+export async function query(sql, params = {}) {
   let connection;
   try {
     connection = await pool.getConnection();
-    const result = await connection.execute(sql, params, { autoCommit: true });
+
+    // Oracle automatically detects whether params is array or object
+    const result = await connection.execute(sql, params, {
+      autoCommit: true,
+      outFormat: oracledb.OUT_FORMAT_OBJECT, // ensures rows come as key:value
+    });
+
     return result;
   } catch (err) {
     console.error("❌ Database query error:", err);
@@ -49,6 +55,7 @@ export async function query(sql, params = []) {
     }
   }
 }
+
 
 // --- Graceful Shutdown ---
 process.on("SIGINT", async () => {
