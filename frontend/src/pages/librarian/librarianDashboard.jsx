@@ -13,7 +13,7 @@ export default function LibrarianDashboard() {
   }, []);
 
   const fetchBooks = async () => {
-    const res = await api.get("/books");
+    const res = await api.get("/librarian/books");
     setBooks(res.data);
   };
 

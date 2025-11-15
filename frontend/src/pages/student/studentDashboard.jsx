@@ -9,10 +9,15 @@ export default function StudentDashboard() {
   const [search, setSearch] = useState("");
   const [fine, setFine] = useState(0);
   const [message, setMessage] = useState("");
-
+  
+  console.log("=== STUDENT DASHBOARD DEBUG ===");
+  console.log("Full user object:", user);
+  console.log("user.erp_id:", user?.erp_id);
+  console.log("user.ERP_ID:", user?.ERP_ID);
+  console.log("================================");
   // Fetch everything once user is loaded
   useEffect(() => {
-    if (user?.erp_id) {
+    if (user?.ERP_ID) {  // ✅ Changed from erp_id to ERP_ID
       fetchBooks();
       fetchBorrowed();
       fetchFine();
@@ -32,7 +37,7 @@ export default function StudentDashboard() {
 
   const fetchBorrowed = async () => {
     try {
-      const res = await api.get(`/student/borrowed/${user.erp_id}`);
+      const res = await api.get(`/student/borrowed/${user.ERP_ID}`);  // ✅ Changed
       setBorrowed(res.data);
     } catch (err) {
       console.error("Error fetching borrowed books:", err);
@@ -41,8 +46,8 @@ export default function StudentDashboard() {
 
   const fetchFine = async () => {
     try {
-      const res = await api.get(`/student/fines/${user.erp_id}`);
-      setFine(res.data?.fine_due || 0);
+        const res = await api.get(`/student/fines/${user.ERP_ID}`);  // ✅ Changed
+        setFine(res.data?.FINE_DUE || 0); // Note: FINE_DUE in uppercase
     } catch (err) {
       console.error("Error fetching fine:", err);
     }
@@ -51,7 +56,7 @@ export default function StudentDashboard() {
   const handleBorrow = async (bookId) => {
     try {
       const res = await api.post(`/student/borrow/${bookId}`, {
-        erp_id: user.erp_id,
+        erp_id: user.ERP_ID,  // ✅ Changed
       });
       setMessage(res.data.message);
       fetchBooks();
@@ -64,7 +69,7 @@ export default function StudentDashboard() {
   const handleReserve = async (bookId) => {
     try {
       const res = await api.post(`/student/reserve/${bookId}`, {
-        erp_id: user.erp_id,
+        erp_id: user.ERP_ID,  // ✅ Changed
       });
       setMessage(res.data.message);
     } catch (err) {
@@ -74,7 +79,7 @@ export default function StudentDashboard() {
 
   const handlePayFine = async () => {
     try {
-      await api.post(`/student/payfine/${user.erp_id}`);
+      await api.post(`/student/payfine/${user.ERP_ID}`);  // ✅ Changed
       setFine(0);
       setMessage("Fine paid successfully!");
     } catch (err) {
@@ -96,7 +101,7 @@ export default function StudentDashboard() {
       <header className="bg-[#8b0000] text-white py-4 px-8 flex justify-between items-center shadow-md sticky top-0 z-10">
         <h1 className="text-2xl font-bold">🎓 Student Dashboard</h1>
         <div className="flex items-center gap-4">
-          <span>Welcome, {user?.first_name || "Student"}</span>
+          <span>Welcome, {user?.FIRST_NAME || "Student"}</span>  {/* ✅ Changed from first_name to FIRST_NAME */}
           <button
             onClick={logout}
             className="bg-white text-[#8b0000] font-semibold px-4 py-1 rounded hover:bg-gray-100 transition"
@@ -191,7 +196,7 @@ export default function StudentDashboard() {
 
           {filteredBooks.length === 0 && (
             <p className="text-center text-gray-600 mt-6">
-              No books found for “{search}”.
+              No books found for "{search}".
             </p>
           )}
         </section>

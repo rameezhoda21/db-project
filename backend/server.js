@@ -49,5 +49,12 @@ app.get("/api/debug/students", async (req, res) => {
   }
 });
 
-
+app.get("/api/testbooks", async (req, res) => {
+  try {
+    const result = await query("SELECT * FROM BOOKS");
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.listen(5000, () => console.log("🚀 Server running on port 5000"));

@@ -21,10 +21,18 @@ export function AuthProvider({ children }) {
   }, []);
 
   // 🟢 Login: save user info globally and persist in localStorage
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-  };
+
+const login = (userData) => {
+  console.log("=== AUTH CONTEXT LOGIN ===");
+  console.log("Raw userData received:", userData);
+  
+  const userToStore = userData.user || userData; // Handle both formats
+  console.log("User to store:", userToStore);
+  console.log("==========================");
+  
+  setUser(userToStore);
+  localStorage.setItem("user", JSON.stringify(userToStore));
+};
 
   // 🔴 Logout: clear user info and remove from localStorage
   const logout = () => {
