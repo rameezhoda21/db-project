@@ -1,63 +1,209 @@
-# Database - Library Management System
+# Library Management System - Database Setup
 
-SQL scripts for Oracle Database setup.
+This directory contains all SQL scripts for setting up the Oracle database for the library management system.
 
-## 📂 Files
+## 📁 Database Files
 
-- `schema.sql` - Database tables and structure
-- `views.sql` - Database views for common queries
-- `triggers.sql` - Automated business logic triggers
-- `seed-data.sql` - Sample data for testing
+### ⭐ Core Files (Use These!)
+- **`00_drop_all.sql`** - Drops all existing tables, views, and triggers (clean slate)
+- **`01_create_tables.sql`** - Creates all database tables (STUDENTS, BOOKS, BORROW, ADMINS, etc.)
+- **`02_views_oracle.sql`** - Creates database views for reporting
+- **`03_triggers_oracle.sql`** - Creates triggers for business logic
+- **`04_sample_data_oracle.sql`** - Inserts sample data for testing
 
-## 🚀 Setup Instructions
+### Legacy Files (For Reference)
+- `schema.sql`, `seed-data.sql`, `views.sql`, `triggers.sql` - Older versions
 
-### 1. Connect to Oracle Database
+---
 
-```sql
-sqlplus username/password@localhost:1521/orcl
+## 🚀 Quick Setup Guide
+
+### Prerequisites
+- ✅ Oracle Database installed and running
+- ✅ SQL Developer installed
+- ✅ Oracle user created (e.g., `C##RAMEEZHODA` with password `123`)
+
+---
+
+## Option 1: Automated Setup (PowerShell)
+
+Run the automated setup script:
+
+```powershell
+cd database
+.\setup-database.ps1
 ```
 
-### 2. Run Scripts in Order
+Or with custom credentials:
 
-```sql
--- Create tables
-@schema.sql
-
--- Create views
-@views.sql
-
--- Create triggers
-@triggers.sql
-
--- (Optional) Load sample data
-@seed-data.sql
+```powershell
+.\setup-database.ps1 -User "YOUR_USER" -Password "YOUR_PASSWORD" -ConnectString "localhost:1521/XEPDB1"
 ```
 
-## 📊 Database Structure
+---
 
-### Tables
-- **ADMIN** - System administrators
-- **LIBRARIAN** - Library staff
-- **STUDENTS** - Student users
-- **BOOKS** - Book inventory
-- **BORROW** - Borrowing records
-- **RESERVATIONS** - Book reservations
-- **FINE** - Fine records
+## Option 2: Manual Setup (SQL Developer)
 
-### Views
-- **AvailableBooks** - Books with available copies
-- **BorrowedBooks** - All borrowed books with status
-- **Overdue_Borrows** - Overdue books
-- **StudentFineSummary** - Fine totals per student
-- **BookPopularity** - Books by borrow count
+See **`MANUAL_SETUP.md`** for detailed step-by-step instructions using SQL Developer.
 
-### Triggers
-- Auto-increment primary keys
-- Update available copies on borrow/return
-- Check fines before borrowing
-- Verify book availability
-- Enforce 3-book borrow limit
-- Auto-calculate late fees (10 units/day)
+**Quick Steps:**
+1. Open SQL Developer and connect to your Oracle database
+2. Open SQL Worksheet (Tools → SQL Worksheet or Ctrl+Shift+N)
+3. Execute files in order using **F5 (Run Script)**:
+   - `00_drop_all.sql`
+   - `01_create_tables.sql`
+   - `02_views_oracle.sql`
+   - `03_triggers_oracle.sql`
+   - `04_sample_data_oracle.sql`
+
+---
+
+## 🔌 Connecting Backend to Database
+
+### Step 1: Configure Environment Variables
+
+Edit `backend/.env` with your Oracle connection details:
+
+```env
+DB_USER=C##RAMEEZHODA
+DB_PASSWORD=123
+DB_CONNECT_STRING=localhost:1521/XEPDB1
+```
+
+**Connect String Examples:**
+- Oracle XE: `localhost:1521/XEPDB1`
+- Oracle Standard: `localhost:1521/ORCL`
+- Remote: `hostname:1521/service_name`
+
+### Step 2: Install Oracle Instant Client (Windows)
+
+1. Download from: https://www.oracle.com/database/technologies/instant-client/downloads.html
+2. Extract to: `C:\oracle\instantclient_19_12` (or any folder)
+3. Add to PATH or set in `.env`:
+   ```env
+   INSTANT_CLIENT_DIR=C:\oracle\instantclient_19_12
+   ```
+
+### Step 3: Install Node Dependencies
+
+```powershell
+cd backend
+npm install
+```
+
+### Step 4: Start Backend Server
+
+```powershell
+npm run dev
+```
+
+### Step 5: Test Database Connection
+
+Open browser or use `curl`:
+
+```powershell
+curl http://localhost:5000/api/testdb
+```
+
+Expected response:
+```json
+{"MESSAGE": "Connected to Oracle!"}
+```
+
+---
+
+## 🧪 Testing Endpoints
+
+After setup, test these endpoints:
+
+- **Test Connection:** `GET http://localhost:5000/api/testdb`
+- **View Students:** `GET http://localhost:5000/api/debug/students`
+- **View Librarians:** `GET http://localhost:5000/api/debug/librarians`
+
+---
+
+## 🗂️ Database Schema Overview
+
+### Tables Created:
+- **STUDENTS** - Student information and fine tracking
+- **BOOKS** - Book catalog with availability
+- **BORROW** - Borrowing records (issue/return dates)
+- **ADMINS** - Administrator accounts
+- **LIBRARY_POLICY** - Loan periods and fine rates
+- **RESERVATIONS** - Book reservation queue
+- **LIBRARIAN** - Librarian accounts
+
+### Views Created:
+- Student borrowing history
+- Available books
+- Overdue books
+- Fine calculations
+
+### Triggers:
+- Auto-update available copies on borrow/return
+- Calculate due dates based on policy
+- Calculate fines for overdue books
+
+---
+
+## 🐛 Troubleshooting
+
+### Error: "ORA-12154: TNS:could not resolve the connect identifier"
+- Check `DB_CONNECT_STRING` format in `.env`
+- Verify Oracle service is running: `lsnrctl status`
+
+### Error: "DPI-1047: Cannot locate a 64-bit Oracle Client library"
+- Install Oracle Instant Client
+- Set `INSTANT_CLIENT_DIR` in `.env`
+- Ensure the path contains `oci.dll`
+
+### Error: "ORA-01017: invalid username/password"
+- Verify credentials in `.env`
+- Test connection in SQL Developer first
+
+### Error: "ORA-00942: table or view does not exist"
+- Run `01_create_tables.sql` first
+- Check if you're connected to the correct schema
+
+### Backend won't start
+- Check if port 5000 is available
+- Look for errors in terminal output
+- Verify all dependencies installed: `npm install`
+
+---
+
+## 📋 Verification Checklist
+
+After setup, verify:
+
+- [ ] All 5 SQL files executed without errors
+- [ ] Tables exist: `SELECT table_name FROM user_tables;`
+- [ ] Sample data inserted: `SELECT COUNT(*) FROM STUDENTS;`
+- [ ] Backend starts: `npm run dev`
+- [ ] Test endpoint works: `http://localhost:5000/api/testdb`
+- [ ] No connection errors in console
+
+---
+
+## 🔄 Rebuilding Database
+
+To start fresh:
+
+```sql
+-- In SQL Developer, run:
+@00_drop_all.sql
+@01_create_tables.sql
+@02_views_oracle.sql
+@03_triggers_oracle.sql
+@04_sample_data_oracle.sql
+```
+
+Or use the PowerShell script again:
+```powershell
+.\setup-database.ps1
+```
+
+---
 
 ## 🔐 Default Login Credentials
 

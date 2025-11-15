@@ -5,10 +5,17 @@ dotenv.config();
 
 // Initialize Oracle Client (required for Thick mode with Oracle Instant Client)
 try {
-  oracledb.initOracleClient();
-  console.log("✅ Oracle Client initialized");
+  const libDir = process.env.INSTANT_CLIENT_DIR;
+  if (libDir) {
+    oracledb.initOracleClient({ libDir });
+    console.log(`✅ Oracle Client initialized with libDir: ${libDir}`);
+  } else {
+    oracledb.initOracleClient();
+    console.log("✅ Oracle Client initialized (auto-detected)");
+  }
 } catch (err) {
   console.error("⚠️ Could not initialize Oracle Client:", err.message);
+  console.error("💡 Make sure Oracle Instant Client is installed and INSTANT_CLIENT_DIR is set in .env");
 }
 
 oracledb.outFormat = oracledb.OUT_FORMAT_OBJECT; // returns results as key:value objects

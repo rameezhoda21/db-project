@@ -17,6 +17,7 @@ export default function StudentDashboard() {
       fetchBorrowed();
       fetchFine();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   // ===== API CALLS =====
