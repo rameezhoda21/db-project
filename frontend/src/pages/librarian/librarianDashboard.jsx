@@ -1,152 +1,187 @@
-import React, { useEffect, useState } from "react";
-import api from "../../services/api";
+import React from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 
 export default function LibrarianDashboard() {
   const { user, logout } = useAuth();
-  const [books, setBooks] = useState([]);
-  const [newBook, setNewBook] = useState({ title: "", author: "", copies: "" });
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    fetchBooks();
-  }, []);
-
-  const fetchBooks = async () => {
-    const res = await api.get("/librarian/books");
-    setBooks(res.data);
-  };
-
-  const handleAddBook = async (e) => {
-    e.preventDefault();
-    if (!newBook.title || !newBook.author || !newBook.copies) return;
-    const res = await api.post("/librarian/add", newBook);
-    setMessage(res.data.message);
-    setNewBook({ title: "", author: "", copies: "" });
-    fetchBooks();
-  };
-
-  const handleRemove = async (id) => {
-    await api.delete(`/librarian/remove/${id}`);
-    setMessage("Book removed successfully");
-    fetchBooks();
-  };
 
   return (
-    <div className="min-h-screen bg-iba-light text-iba-dark">
+    <div className="min-h-screen bg-[#fff6f6] text-[#2b2b2b]">
       {/* Navbar */}
-      <header className="bg-iba-red text-white py-4 px-8 flex justify-between items-center shadow-md">
-        <h1 className="text-2xl font-bold">📖 Librarian Dashboard</h1>
-        <div className="flex items-center gap-4">
-          <span>Welcome, {user?.name || "Librarian"}</span>
-          <button
-            onClick={logout}
-            className="bg-white text-iba-red font-semibold px-4 py-1 rounded hover:bg-gray-100 transition"
-          >
-            Logout
-          </button>
+      <header className="bg-[#8b0000] text-white py-4 px-8 shadow-md sticky top-0 z-10">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">📚 Librarian Dashboard</h1>
+          <nav className="flex items-center gap-6">
+            <Link
+              to="/librarian"
+              className="hover:underline font-semibold transition border-b-2 border-white"
+            >
+              Home
+            </Link>
+            <Link
+              to="/librarian/manage-books"
+              className="hover:underline font-semibold transition"
+            >
+              Manage Books
+            </Link>
+            <Link
+              to="/librarian/issue-requests"
+              className="hover:underline font-semibold transition"
+            >
+              Issue Requests
+            </Link>
+            <Link
+              to="/librarian/return-book"
+              className="hover:underline font-semibold transition"
+            >
+              Return Book
+            </Link>
+            <Link
+              to="/librarian/borrows"
+              className="hover:underline font-semibold transition"
+            >
+              View Borrows
+            </Link>
+            <button
+              onClick={logout}
+              className="bg-white text-[#8b0000] font-semibold px-4 py-1 rounded hover:bg-gray-100 transition"
+            >
+              Logout
+            </button>
+          </nav>
         </div>
       </header>
 
-      <main className="p-8 space-y-10">
-        {/* Message */}
-        {message && (
-          <div className="bg-green-100 text-green-800 border border-green-300 px-4 py-2 rounded-md text-center">
-            {message}
-          </div>
-        )}
-
-        {/* Add New Book Section */}
-        <section className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <h2 className="text-xl font-bold text-iba-red mb-4">
-            ➕ Add New Book
+      <main className="p-8 space-y-6">
+        {/* Welcome Section */}
+        <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+          <h2 className="text-2xl font-bold text-[#8b0000]">
+            Welcome, {user?.FIRST_NAME || "Librarian"}! 👋
           </h2>
-          <form
-            onSubmit={handleAddBook}
-            className="grid grid-cols-1 md:grid-cols-4 gap-4"
+          <p className="text-gray-600 mt-2">
+            Librarian ID: {user?.LIBRARIAN_ID}
+          </p>
+        </div>
+
+        {/* Quick Actions Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Link
+            to="/librarian/manage-books"
+            className="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-1"
           >
-            <input
-              type="text"
-              placeholder="Book Title"
-              className="p-2 border rounded-md focus:ring-2 focus:ring-iba-red outline-none"
-              value={newBook.title}
-              onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Author"
-              className="p-2 border rounded-md focus:ring-2 focus:ring-iba-red outline-none"
-              value={newBook.author}
-              onChange={(e) =>
-                setNewBook({ ...newBook, author: e.target.value })
-              }
-            />
-            <input
-              type="number"
-              placeholder="Copies"
-              className="p-2 border rounded-md focus:ring-2 focus:ring-iba-red outline-none"
-              value={newBook.copies}
-              onChange={(e) =>
-                setNewBook({ ...newBook, copies: e.target.value })
-              }
-            />
-            <button
-              type="submit"
-              className="bg-iba-red text-white font-semibold rounded-md hover:bg-iba-dark transition"
-            >
-              Add Book
-            </button>
-          </form>
-        </section>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold">
+                  Manage Books
+                </p>
+                <p className="text-lg font-bold text-[#8b0000] mt-2">
+                  Add, Edit, Delete
+                </p>
+              </div>
+              <div className="text-4xl">📚</div>
+            </div>
+            <p className="text-gray-500 text-xs mt-4">
+              Manage library inventory
+            </p>
+          </Link>
 
-        {/* Book Inventory */}
-        <section className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <h2 className="text-xl font-bold text-iba-red mb-4">
-            📚 Current Book Inventory
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse border border-gray-200">
-              <thead className="bg-iba-red text-white">
-                <tr>
-                  <th className="p-3">ID</th>
-                  <th className="p-3">Title</th>
-                  <th className="p-3">Author</th>
-                  <th className="p-3">Copies</th>
-                  <th className="p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {books.map((book) => (
-                  <tr
-                    key={book.id}
-                    className="border-t border-gray-200 hover:bg-gray-50"
-                  >
-                    <td className="p-3">{book.id}</td>
-                    <td className="p-3 font-semibold">{book.title}</td>
-                    <td className="p-3">{book.author}</td>
-                    <td className="p-3">{book.copies}</td>
-                    <td className="p-3">
-                      <div className="flex gap-2">
-                        <button className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700">
-                          Issue
-                        </button>
-                        <button className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600">
-                          Return
-                        </button>
-                        <button
-                          onClick={() => handleRemove(book.id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+          <Link
+            to="/librarian/issue-requests"
+            className="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-1"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold">
+                  Issue Requests
+                </p>
+                <p className="text-lg font-bold text-blue-600 mt-2">
+                  Approve Requests
+                </p>
+              </div>
+              <div className="text-4xl">📋</div>
+            </div>
+            <p className="text-gray-500 text-xs mt-4">
+              Review and approve borrow requests
+            </p>
+          </Link>
+
+          <Link
+            to="/librarian/return-book"
+            className="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-1"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold">
+                  Return Book
+                </p>
+                <p className="text-lg font-bold text-green-600 mt-2">
+                  Process Returns
+                </p>
+              </div>
+              <div className="text-4xl">📥</div>
+            </div>
+            <p className="text-gray-500 text-xs mt-4">
+              Process book returns
+            </p>
+          </Link>
+
+          <Link
+            to="/librarian/borrows"
+            className="bg-white shadow-md rounded-lg p-6 border border-gray-200 hover:shadow-xl transition transform hover:-translate-y-1"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm font-semibold">
+                  View Borrows
+                </p>
+                <p className="text-lg font-bold text-purple-600 mt-2">
+                  All Records
+                </p>
+              </div>
+              <div className="text-4xl">📋</div>
+            </div>
+            <p className="text-gray-500 text-xs mt-4">
+              View borrow history
+            </p>
+          </Link>
+        </div>
+
+        {/* Info Section */}
+        <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+          <h3 className="text-xl font-bold text-[#8b0000] mb-4">
+            Librarian Functions
+          </h3>
+          <ul className="space-y-2 text-gray-700">
+            <li className="flex items-start gap-2">
+              <span className="text-[#8b0000] font-bold">•</span>
+              <span>
+                <strong>Manage Books:</strong> Add new books to the inventory,
+                edit book details, or remove books
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#8b0000] font-bold">•</span>
+              <span>
+                <strong>Issue Requests:</strong> Review pending borrow requests
+                from students and approve them at the counter
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#8b0000] font-bold">•</span>
+              <span>
+                <strong>Return Books:</strong> Process book returns and
+                automatically calculate fines for late returns
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-[#8b0000] font-bold">•</span>
+              <span>
+                <strong>View Borrows:</strong> See all active borrows and
+                complete borrow history
+              </span>
+            </li>
+          </ul>
+        </div>
       </main>
     </div>
   );

@@ -77,12 +77,17 @@ CREATE TABLE BORROW (
     borrow_id       NUMBER PRIMARY KEY,
     erp_id          NUMBER NOT NULL,
     book_id         NUMBER NOT NULL,
-    issue_date      DATE DEFAULT SYSDATE NOT NULL,
+    issue_date      DATE,
     due_date        DATE,
     return_date     DATE,
+    status          VARCHAR2(20) DEFAULT 'PENDING' NOT NULL,
+    approval_date   DATE,
+    librarian_id    NUMBER,
     CONSTRAINT fk_borrow_student FOREIGN KEY (erp_id) REFERENCES STUDENTS(erp_id),
     CONSTRAINT fk_borrow_book FOREIGN KEY (book_id) REFERENCES BOOKS(book_id),
-    CONSTRAINT chk_return_after_issue CHECK (return_date IS NULL OR return_date >= issue_date)
+    CONSTRAINT fk_borrow_librarian FOREIGN KEY (librarian_id) REFERENCES LIBRARIAN(librarian_id),
+    CONSTRAINT chk_return_after_issue CHECK (return_date IS NULL OR return_date >= issue_date),
+    CONSTRAINT chk_borrow_status CHECK (status IN ('PENDING', 'ISSUED', 'RETURNED'))
 );
 
 -- ============================================================================

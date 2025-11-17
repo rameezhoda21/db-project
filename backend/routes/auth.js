@@ -6,6 +6,8 @@ const router = express.Router();
 // ===== Student Login =====
 router.post("/student", async (req, res) => {
   const { erpId, password } = req.body;
+  console.log("🔍 Student login attempt:", { erpId, password });
+  
   try {
     const result = await query(
       `SELECT erp_id, first_name, last_name, email 
@@ -14,12 +16,15 @@ router.post("/student", async (req, res) => {
       { erp: erpId, pw: password }
     );
 
+    console.log("📊 Query result:", result.rows);
+
     if (result.rows.length === 0)
       return res.status(401).json({ error: "Invalid ERP ID or password" });
 
     const user = result.rows[0];
     res.json({ message: "Login successful", user, role: "student" });
   } catch (err) {
+    console.error("❌ Student login error:", err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -27,6 +32,8 @@ router.post("/student", async (req, res) => {
 // ===== Librarian Login =====
 router.post("/librarian", async (req, res) => {
   const { erpId, password } = req.body; // erpId is actually librarian_id (numeric)
+  console.log("🔍 Librarian login attempt:", { erpId, password });
+  
   try {
     const result = await query(
       `SELECT librarian_id, first_name, last_name, email
@@ -34,6 +41,8 @@ router.post("/librarian", async (req, res) => {
        WHERE librarian_id = :id AND pass = :pw`,
       { id: erpId, pw: password }
     );
+
+    console.log("📊 Query result:", result.rows);
 
     if (result.rows.length === 0)
       return res.status(401).json({ error: "Invalid ID or password" });

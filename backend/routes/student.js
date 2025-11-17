@@ -12,17 +12,19 @@ router.get("/books", async (req, res) => {
   }
 });
 
-// 🔹 Borrow book (trigger checks fines and stock)
-router.post("/borrow/:book_id", async (req, res) => {
-  const { erp_id } = req.body;
-  const { book_id } = req.params;
+// 🔹 Create borrow request (PENDING status - needs librarian approval)
+router.post("/borrow", async (req, res) => {
+  const { erp_id, book_id } = req.body;
+  console.log("📖 Borrow request - ERP:", erp_id, "Book:", book_id);
   try {
     await query(
-      "INSERT INTO BORROW (erp_id, book_id) VALUES (:erp, :book)",
+      "INSERT INTO BORROW (borrow_id, erp_id, book_id, status) VALUES (borrow_seq.NEXTVAL, :erp, :book, 'PENDING')",
       { erp: erp_id, book: book_id }
     );
-    res.json({ message: "Book borrowed successfully" });
+    console.log("✅ Borrow request created (pending approval)");
+    res.json({ message: "Request submitted! Go to the counter to collect your book." });
   } catch (err) {
+    console.error("❌ Error creating borrow request:", err);
     res.status(400).json({ error: err.message });
   }
 });
@@ -56,12 +58,31 @@ router.post("/reserve/:book_id", async (req, res) => {
   }
 });
 
-// 🔹 View borrowed books
+// 🔹 View my books (pending requests and issued books)
 router.get("/borrowed/:erp_id", async (req, res) => {
   try {
     const result = await query(
-      "SELECT * FROM BorrowedBooks WHERE erp_id = :erp",
-      { erp: req.params.erp_id } // ✅ Fixed: changed from [req.params.erp_id] to { erp: req.params.erp_id }
+      `SELECT 
+        b.borrow_id,
+        b.book_id,
+        bk.title,
+        bk.author,
+        bk.genre,
+        b.status,
+        b.issue_date,
+        b.due_date,
+        b.approval_date,
+        b.return_date
+       FROM BORROW b
+       JOIN BOOKS bk ON b.book_id = bk.book_id
+       WHERE b.erp_id = :erp AND b.status IN ('PENDING', 'ISSUED')
+       ORDER BY 
+         CASE b.status 
+           WHEN 'PENDING' THEN 1
+           WHEN 'ISSUED' THEN 2
+         END,
+         b.borrow_id DESC`,
+      { erp: req.params.erp_id }
     );
     res.json(result.rows);
   } catch (err) {
@@ -69,16 +90,41 @@ router.get("/borrowed/:erp_id", async (req, res) => {
   }
 });
 
-// 🔹 View unpaid fines
+// 🔹 View unpaid fines with details
 router.get("/fines/:erp_id", async (req, res) => {
   try {
-    const result = await query(
+    // Get total fine amount
+    const totalResult = await query(
       `SELECT NVL(SUM(fine_amount), 0) as fine_due 
        FROM FINE 
        WHERE erp_id = :erp AND paid = 0`,
       { erp: req.params.erp_id }
     );
-    res.json(result.rows[0]); // Returns { FINE_DUE: 0 }
+
+    // Get detailed fine information with book details
+    const detailsResult = await query(
+      `SELECT 
+        f.fine_id,
+        f.fine_amount,
+        f.paid,
+        b.borrow_id,
+        b.issue_date,
+        b.due_date,
+        b.return_date,
+        bk.title as book_title,
+        bk.author
+       FROM FINE f
+       JOIN BORROW b ON f.borrow_id = b.borrow_id
+       JOIN BOOKS bk ON b.book_id = bk.book_id
+       WHERE f.erp_id = :erp AND f.paid = 0
+       ORDER BY b.return_date DESC`,
+      { erp: req.params.erp_id }
+    );
+
+    res.json({
+      FINE_DUE: totalResult.rows[0]?.FINE_DUE || 0,
+      fines: detailsResult.rows || []
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

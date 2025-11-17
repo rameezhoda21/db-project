@@ -38,6 +38,7 @@ const login = (userData) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    window.location.href = "/login";
   };
 
   const value = {
