@@ -168,7 +168,7 @@ export default function StudentDashboard() {
                   <div className="text-5xl">💰</div>
                 </div>
                 <p className="text-gray-500 text-xs mt-4">
-                  {stats.totalFine > 0 ? "Pay your fines" : "No fines due"}
+                  {stats.totalFine > 0 ? "Pay at library counter" : "No fines due"}
                 </p>
               </Link>
             </div>

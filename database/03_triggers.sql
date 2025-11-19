@@ -175,9 +175,9 @@ BEGIN
         
         v_fine_amount := v_days_overdue * v_fine_per_day;
         
-        -- Insert fine record
-        INSERT INTO FINE (fine_id, erp_id, borrow_id, fine_amount, fine_reason, fine_date, paid)
-        VALUES (fine_seq.NEXTVAL, :NEW.erp_id, :NEW.borrow_id, v_fine_amount, 
+        -- Insert fine record (use librarian who issued the book, or default to 101 if null)
+        INSERT INTO FINE (fine_id, erp_id, librarian_id, borrow_id, fine_amount, fine_reason, fine_date, paid)
+        VALUES (fine_seq.NEXTVAL, :NEW.erp_id, NVL(:NEW.librarian_id, 101), :NEW.borrow_id, v_fine_amount, 
                 'Late return - ' || v_days_overdue || ' days overdue', SYSDATE, 0);
         
         -- Update student's total fine

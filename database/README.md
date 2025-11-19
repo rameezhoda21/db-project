@@ -287,3 +287,5 @@ After setup, verify:
 - **Students cannot borrow if they have unpaid fines**
 - **Books are not immediately issued** - librarians must approve at counter
 - **Fines are calculated automatically on return** if book is overdue
+
+

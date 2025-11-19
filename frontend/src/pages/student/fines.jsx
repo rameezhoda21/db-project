@@ -40,17 +40,6 @@ export default function Fines() {
     }
   };
 
-  const handlePayFine = async () => {
-    try {
-      await api.post(`/student/payfine/${user.ERP_ID}`);
-      setTotalFine(0);
-      setFines([]);
-      setMessage("Fine paid successfully!");
-    } catch (err) {
-      setMessage("Error processing payment. Please try again.");
-    }
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) return "—";
     const date = new Date(dateString);
@@ -145,12 +134,14 @@ export default function Fines() {
               </p>
             </div>
             {totalFine > 0 && (
-              <button
-                onClick={handlePayFine}
-                className="bg-[#8b0000] text-white px-6 py-3 rounded-md font-semibold hover:bg-[#a81818] transition"
-              >
-                Pay Now
-              </button>
+              <div className="bg-blue-50 border border-blue-300 rounded-lg px-6 py-4 max-w-md">
+                <p className="text-blue-900 font-semibold text-sm">
+                  💳 Please pay your fine at the library counter
+                </p>
+                <p className="text-blue-700 text-xs mt-1">
+                  Visit the circulation desk during working hours to clear your outstanding balance
+                </p>
+              </div>
             )}
           </div>
         </div>
@@ -231,7 +222,7 @@ export default function Fines() {
           <ul className="text-blue-800 text-sm space-y-1">
             <li>• Fines are calculated based on the number of days overdue</li>
             <li>• Late returns may affect your borrowing privileges</li>
-            <li>• Pay fines promptly to continue borrowing books</li>
+            <li>• Pay fines at the library counter to continue borrowing books</li>
             <li>• Contact the librarian if you have questions about fines</li>
           </ul>
         </div>
