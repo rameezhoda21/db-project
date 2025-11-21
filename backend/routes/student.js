@@ -2,10 +2,20 @@ import express from "express";
 import { query } from "../config/db.js";
 const router = express.Router();
 
-// 🔹 Get available books
+// 🔹 Get all books (include reservation count)
 router.get("/books", async (req, res) => {
   try {
-    const result = await query("SELECT * FROM AvailableBooks");
+    const result = await query(
+      `SELECT 
+         b.book_id as BOOK_ID,
+         b.title as TITLE,
+         b.author as AUTHOR,
+         b.genre as GENRE,
+         b.year_published as YEAR_PUBLISHED,
+         b.available_copies as AVAILABLE_COPIES,
+         (SELECT COUNT(*) FROM RESERVATIONS r WHERE r.book_id = b.book_id) AS RESERVATION_COUNT
+       FROM BOOKS b`
+    );
     res.json(result.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -43,16 +53,38 @@ router.post("/return", async (req, res) => {
   }
 });
 
-// 🔹 Reserve a book
+// 🔹 Reserve a book (prevents duplicate reservation by same student)
 router.post("/reserve/:book_id", async (req, res) => {
   const { erp_id } = req.body;
   const { book_id } = req.params;
   try {
-    await query(
-      "INSERT INTO RESERVATIONS (erp_id, book_id, reservation_date) VALUES (:erp, :book, SYSDATE)",
+    // Check for existing reservation by this student for the same book
+    const exists = await query(
+      "SELECT COUNT(*) AS CNT FROM RESERVATIONS WHERE erp_id = :erp AND book_id = :book",
       { erp: erp_id, book: book_id }
     );
-    res.json({ message: "Book reserved successfully" });
+    const already = exists.rows[0]?.CNT
+      ? parseInt(exists.rows[0].CNT, 10)
+      : 0;
+
+    if (already > 0) {
+      return res.status(400).json({ error: "You have already reserved this book" });
+    }
+
+    // Insert reservation with sequence
+    await query(
+      "INSERT INTO RESERVATIONS (reservation_id, erp_id, book_id, reservation_date) VALUES (reservation_seq.NEXTVAL, :erp, :book, SYSDATE)",
+      { erp: erp_id, book: book_id }
+    );
+
+    // Return updated reservation count
+    const cntRes = await query(
+      "SELECT COUNT(*) AS CNT FROM RESERVATIONS WHERE book_id = :book",
+      { book: book_id }
+    );
+    const cnt = cntRes.rows[0]?.CNT ? parseInt(cntRes.rows[0].CNT, 10) : 0;
+
+    res.json({ message: "Book reserved successfully", reservations_count: cnt });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

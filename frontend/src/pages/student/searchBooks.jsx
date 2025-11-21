@@ -8,6 +8,7 @@ export default function SearchBooks() {
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
   const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("success");
 
   useEffect(() => {
     fetchBooks();
@@ -36,6 +37,7 @@ export default function SearchBooks() {
         book_id: bookId,
       });
       setMessage("✅ " + res.data.message);
+      setMessageType("success");
       
       // Clear message after 3 seconds
       setTimeout(() => {
@@ -43,9 +45,35 @@ export default function SearchBooks() {
       }, 3000);
     } catch (err) {
       console.error("Error creating borrow request:", err);
-      setMessage(
-        err.response?.data?.error || "Error creating request. You may have unpaid fines."
-      );
+      setMessage(err.response?.data?.error || "Error creating request. You may have unpaid fines.");
+      setMessageType("error");
+    }
+  };
+
+  const handleReserve = async (bookId) => {
+    if (!user?.ERP_ID) {
+      setMessage("Error: Not logged in");
+      return;
+    }
+
+    try {
+      setMessage("");
+      const res = await api.post(`/student/reserve/${bookId}`, {
+        erp_id: user.ERP_ID,
+      });
+
+      setMessage("✅ " + (res.data.message || "Reserved"));
+      setMessageType("success");
+      // Refresh book list to get updated reservation counts
+      fetchBooks();
+
+      setTimeout(() => {
+        setMessage("");
+      }, 3000);
+    } catch (err) {
+      console.error("Error reserving book:", err);
+      setMessage(err.response?.data?.error || "Error reserving book");
+      setMessageType("error");
     }
   };
 
@@ -107,14 +135,10 @@ export default function SearchBooks() {
           </p>
         </div>
 
-        {/* Notification Message */}
+        {/* Floating toast */}
         {message && (
-          <div className={`px-4 py-3 rounded-md text-center border ${
-            message.includes("✅") 
-              ? "bg-green-100 text-green-800 border-green-300" 
-              : message.includes("Error") || message.includes("fines")
-              ? "bg-red-100 text-red-800 border-red-300"
-              : "bg-blue-100 text-blue-800 border-blue-300"
+          <div className={`fixed top-6 right-6 z-50 px-4 py-2 rounded shadow-lg ${
+            messageType === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
           }`}>
             {message}
           </div>
@@ -163,17 +187,27 @@ export default function SearchBooks() {
                 </p>
               </div>
 
-              <button
-                onClick={() => handleBorrow(book.BOOK_ID)}
-                disabled={book.AVAILABLE_COPIES === 0}
-                className={`w-full py-2 rounded-md font-semibold transition ${
-                  book.AVAILABLE_COPIES > 0
-                    ? "bg-[#8b0000] text-white hover:bg-[#a81818]"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                {book.AVAILABLE_COPIES > 0 ? "Borrow" : "Unavailable"}
-              </button>
+              {book.AVAILABLE_COPIES > 0 ? (
+                <button
+                  onClick={() => handleBorrow(book.BOOK_ID)}
+                  className={`w-full py-2 rounded-md font-semibold transition bg-[#8b0000] text-white hover:bg-[#a81818]`}
+                >
+                  Borrow
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-red-600 font-semibold">Unavailable</span>
+                    <span className="text-sm text-gray-600">{book.RESERVATION_COUNT || 0} reserved</span>
+                  </div>
+                  <button
+                    onClick={() => handleReserve(book.BOOK_ID)}
+                    className="w-full py-2 rounded-md font-semibold transition bg-yellow-500 text-white hover:bg-yellow-600"
+                  >
+                    Reserve
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
