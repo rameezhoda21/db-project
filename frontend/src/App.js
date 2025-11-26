@@ -15,6 +15,10 @@ import IssueRequests from "./pages/librarian/issueRequests";
 import ReturnBook from "./pages/librarian/returnBook";
 import ViewBorrows from "./pages/librarian/viewBorrows";
 import AdminDashboard from "./pages/admin/adminDashboard";
+import AdminViewBorrows from "./pages/admin/viewBorrows";
+import Inventory from "./pages/admin/inventory";
+import RecentActivities from "./pages/admin/recentActivities";
+import Registrations from "./pages/admin/registrations";
 
 function App() {
   return (
@@ -41,6 +45,10 @@ function App() {
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/borrows" element={<AdminViewBorrows />} />
+          <Route path="/admin/inventory" element={<Inventory />} />
+          <Route path="/admin/activities" element={<RecentActivities />} />
+          <Route path="/admin/registrations" element={<Registrations />} />
         </Routes>
       </Router>
     </AuthProvider>

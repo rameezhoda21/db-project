@@ -57,17 +57,21 @@ router.post("/librarian", async (req, res) => {
 
 // ===== Admin Login =====
 router.post("/admin", async (req, res) => {
-  const { username, password } = req.body;
+  const { erpId, password } = req.body; // erpId holds admin_id
+  console.log("🔍 Admin login attempt:", { erpId, password });
+  
   try {
     const result = await query(
-      `SELECT admin_id, username, email
-       FROM ADMIN
-       WHERE username = :user AND pass = :pw`,
-      { user: username, pw: password }
+      `SELECT admin_id, first_name, last_name, email
+       FROM ADMINS
+       WHERE admin_id = :id AND pass = :pw`,
+      { id: erpId, pw: password }
     );
 
+    console.log("📊 Query result:", result.rows);
+
     if (result.rows.length === 0)
-      return res.status(401).json({ error: "Invalid username or password" });
+      return res.status(401).json({ error: "Invalid admin ID or password" });
 
     const user = result.rows[0];
     res.json({ message: "Login successful", user, role: "admin" });

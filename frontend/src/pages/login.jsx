@@ -15,14 +15,17 @@ export default function Login() {
     e.preventDefault();
     try {
       const endpoint =
-        role === "student" ? "/auth/student" : "/auth/librarian";
+        role === "student" ? "/auth/student" : 
+        role === "librarian" ? "/auth/librarian" : 
+        "/auth/admin";
       const res = await api.post(endpoint, { erpId, password });
       login(res.data);
 
       if (role === "student") navigate("/student");
       else if (role === "librarian") navigate("/librarian");
+      else if (role === "admin") navigate("/admin");
     } catch {
-      setError("Invalid ERP ID or password");
+      setError("Invalid credentials");
     }
   };
 
@@ -56,7 +59,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setRole("student")}
-              className={`px-4 py-2 rounded-full font-semibold text-sm transition ${role === "student"
+              className={`px-3 py-2 rounded-full font-semibold text-sm transition ${role === "student"
                   ? "bg-iba-red text-white shadow"
                   : "text-gray-700 hover:bg-gray-200"
                 }`}
@@ -66,12 +69,22 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setRole("librarian")}
-              className={`px-4 py-2 rounded-full font-semibold text-sm transition ${role === "librarian"
+              className={`px-3 py-2 rounded-full font-semibold text-sm transition ${role === "librarian"
                   ? "bg-iba-red text-white shadow"
                   : "text-gray-700 hover:bg-gray-200"
                 }`}
             >
               Librarian
+            </button>
+            <button
+              type="button"
+              onClick={() => setRole("admin")}
+              className={`px-3 py-2 rounded-full font-semibold text-sm transition ${role === "admin"
+                  ? "bg-iba-red text-white shadow"
+                  : "text-gray-700 hover:bg-gray-200"
+                }`}
+            >
+              Admin
             </button>
           </div>
         </div>
@@ -80,7 +93,7 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <div>
             <label className="block mb-1 font-semibold">
-              {role === "student" ? "ERP ID" : "Username"}
+              {role === "student" ? "ERP ID" : role === "admin" ? "Admin ID" : "Librarian ID"}
             </label>
             <input
               type="text"
@@ -88,8 +101,10 @@ export default function Login() {
               onChange={(e) => setErpId(e.target.value)}
               placeholder={
                 role === "student"
-                  ? "Enter ERP ID (e.g. S123)"
-                  : "Enter Librarian Username"
+                  ? "Enter ERP ID (e.g. 22001)"
+                  : role === "admin"
+                  ? "Enter Admin ID (e.g. 1)"
+                  : "Enter Librarian ID (e.g. 101)"
               }
               className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-iba-red focus:outline-none"
               required
@@ -118,7 +133,7 @@ export default function Login() {
             type="submit"
             className="mt-2 w-full bg-iba-red hover:bg-iba-dark text-white py-2.5 rounded-md font-semibold transition-all duration-200"
           >
-            Login as {role === "student" ? "Student" : "Librarian"}
+            Login as {role === "student" ? "Student" : role === "librarian" ? "Librarian" : "Admin"}
           </button>
         </form>
 

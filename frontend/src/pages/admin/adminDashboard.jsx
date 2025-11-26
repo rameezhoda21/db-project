@@ -1,44 +1,49 @@
-import React, { useEffect, useState } from "react";
-import api from "../../services/api";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext";
 
-export default function LibrarianDashboard() {
+export default function AdminDashboard() {
   const { user, logout } = useAuth();
-  const [books, setBooks] = useState([]);
-  const [newBook, setNewBook] = useState({ title: "", author: "", copies: "" });
-  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchBooks();
-  }, []);
-
-  const fetchBooks = async () => {
-    const res = await api.get("/student/books");
-    setBooks(res.data);
-  };
-
-  const handleAddBook = async (e) => {
-    e.preventDefault();
-    if (!newBook.title || !newBook.author || !newBook.copies) return;
-    const res = await api.post("/librarian/add", newBook);
-    setMessage(res.data.message);
-    setNewBook({ title: "", author: "", copies: "" });
-    fetchBooks();
-  };
-
-  const handleRemove = async (id) => {
-    await api.delete(`/librarian/remove/${id}`);
-    setMessage("Book removed successfully");
-    fetchBooks();
-  };
+  const dashboardCards = [
+    {
+      title: "View Borrows",
+      description: "See all borrowing transactions",
+      icon: "📚",
+      path: "/admin/borrows",
+      color: "bg-blue-500",
+    },
+    {
+      title: "Books Inventory",
+      description: "Manage library book collection",
+      icon: "📖",
+      path: "/admin/inventory",
+      color: "bg-green-500",
+    },
+    {
+      title: "Recent Activities",
+      description: "Monitor librarian & student actions",
+      icon: "📊",
+      path: "/admin/activities",
+      color: "bg-purple-500",
+    },
+    {
+      title: "Registrations",
+      description: "Approve/reject new user signups",
+      icon: "✅",
+      path: "/admin/registrations",
+      color: "bg-yellow-500",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-iba-light text-iba-dark">
       {/* Navbar */}
       <header className="bg-iba-red text-white py-4 px-8 flex justify-between items-center shadow-md">
-        <h1 className="text-2xl font-bold">📖 Librarian Dashboard</h1>
+        <h1 className="text-2xl font-bold">🔐 Admin Dashboard</h1>
         <div className="flex items-center gap-4">
-          <span>Welcome, {user?.name || "Librarian"}</span>
+          <span>Welcome, {user?.FIRST_NAME || "Admin"}</span>
           <button
             onClick={logout}
             className="bg-white text-iba-red font-semibold px-4 py-1 rounded hover:bg-gray-100 transition"
@@ -48,105 +53,30 @@ export default function LibrarianDashboard() {
         </div>
       </header>
 
-      <main className="p-8 space-y-10">
-        {/* Message */}
-        {message && (
-          <div className="bg-green-100 text-green-800 border border-green-300 px-4 py-2 rounded-md text-center">
-            {message}
-          </div>
-        )}
+      <main className="p-8">
+        <h2 className="text-3xl font-bold text-iba-red mb-8">System Overview</h2>
 
-        {/* Add New Book Section */}
-        <section className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <h2 className="text-xl font-bold text-iba-red mb-4">
-            ➕ Add New Book
-          </h2>
-          <form
-            onSubmit={handleAddBook}
-            className="grid grid-cols-1 md:grid-cols-4 gap-4"
-          >
-            <input
-              type="text"
-              placeholder="Book Title"
-              className="p-2 border rounded-md focus:ring-2 focus:ring-iba-red outline-none"
-              value={newBook.title}
-              onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Author"
-              className="p-2 border rounded-md focus:ring-2 focus:ring-iba-red outline-none"
-              value={newBook.author}
-              onChange={(e) =>
-                setNewBook({ ...newBook, author: e.target.value })
-              }
-            />
-            <input
-              type="number"
-              placeholder="Copies"
-              className="p-2 border rounded-md focus:ring-2 focus:ring-iba-red outline-none"
-              value={newBook.copies}
-              onChange={(e) =>
-                setNewBook({ ...newBook, copies: e.target.value })
-              }
-            />
-            <button
-              type="submit"
-              className="bg-iba-red text-white font-semibold rounded-md hover:bg-iba-dark transition"
+        {/* Dashboard Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {dashboardCards.map((card, index) => (
+            <div
+              key={index}
+              onClick={() => navigate(card.path)}
+              className="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl transition-all transform hover:scale-105 border-t-4 border-iba-red"
             >
-              Add Book
-            </button>
-          </form>
-        </section>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-4xl">{card.icon}</span>
+                <div className={`${card.color} w-12 h-12 rounded-full flex items-center justify-center text-white font-bold`}>
+                  →
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-iba-dark mb-2">{card.title}</h3>
+              <p className="text-gray-600 text-sm">{card.description}</p>
+            </div>
+          ))}
+        </div>
 
-        {/* Book Inventory */}
-        <section className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
-          <h2 className="text-xl font-bold text-iba-red mb-4">
-            📚 Current Book Inventory
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse border border-gray-200">
-              <thead className="bg-iba-red text-white">
-                <tr>
-                  <th className="p-3">ID</th>
-                  <th className="p-3">Title</th>
-                  <th className="p-3">Author</th>
-                  <th className="p-3">Copies</th>
-                  <th className="p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {books.map((book) => (
-                  <tr
-                    key={book.id}
-                    className="border-t border-gray-200 hover:bg-gray-50"
-                  >
-                    <td className="p-3">{book.id}</td>
-                    <td className="p-3 font-semibold">{book.title}</td>
-                    <td className="p-3">{book.author}</td>
-                    <td className="p-3">{book.copies}</td>
-                    <td className="p-3">
-                      <div className="flex gap-2">
-                        <button className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700">
-                          Issue
-                        </button>
-                        <button className="bg-yellow-500 text-white px-3 py-1 rounded-md hover:bg-yellow-600">
-                          Return
-                        </button>
-                        <button
-                          onClick={() => handleRemove(book.id)}
-                          className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+
       </main>
     </div>
   );
