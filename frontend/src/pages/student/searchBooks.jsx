@@ -24,7 +24,8 @@ export default function SearchBooks() {
   };
 
   const handleBorrow = async (bookId) => {
-    if (!user?.ERP_ID) {
+    const erpId = user?.erpId || user?.ERP_ID;
+    if (!erpId) {
       setMessage("Error: Not logged in");
       return;
     }
@@ -32,7 +33,7 @@ export default function SearchBooks() {
     try {
       setMessage("");
       const res = await api.post("/student/borrow", {
-        erp_id: user.ERP_ID,
+        erp_id: erpId,
         book_id: bookId,
       });
       setMessage("✅ " + res.data.message);

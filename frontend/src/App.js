@@ -4,6 +4,9 @@ import { AuthProvider } from "./context/authContext"; // ✅ import the provider
 
 import Landing from "./pages/landing";
 import Login from "./pages/login";
+import Signup from "./pages/signup";
+import ForgotPassword from "./pages/forgotPassword";
+import ResetPassword from "./pages/resetPassword";
 import StudentDashboard from "./pages/student/studentDashboard";
 import BrowseBooks from "./pages/student/browseBooks";
 import SearchBooks from "./pages/student/searchBooks";
@@ -19,6 +22,7 @@ import AdminViewBorrows from "./pages/admin/viewBorrows";
 import Inventory from "./pages/admin/inventory";
 import RecentActivities from "./pages/admin/recentActivities";
 import Registrations from "./pages/admin/registrations";
+import ManageFines from "./pages/admin/manageFines";
 
 function App() {
   return (
@@ -28,6 +32,9 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           
           {/* Student Routes */}
           <Route path="/student" element={<StudentDashboard />} />
@@ -49,6 +56,7 @@ function App() {
           <Route path="/admin/inventory" element={<Inventory />} />
           <Route path="/admin/activities" element={<RecentActivities />} />
           <Route path="/admin/registrations" element={<Registrations />} />
+          <Route path="/admin/manage-fines" element={<ManageFines />} />
         </Routes>
       </Router>
     </AuthProvider>

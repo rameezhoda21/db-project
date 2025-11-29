@@ -15,7 +15,9 @@ CREATE TABLE STUDENTS (
     last_name       VARCHAR2(255) NOT NULL,
     email           VARCHAR2(100) UNIQUE NOT NULL,
     pass            VARCHAR2(255) NOT NULL,
-    fine_due        NUMBER(10, 2) DEFAULT 0.00 CHECK (fine_due >= 0)
+    fine_due        NUMBER(10, 2) DEFAULT 0.00 CHECK (fine_due >= 0),
+    reset_token     VARCHAR2(255),
+    reset_token_expiry TIMESTAMP
 );
 
 -- ============================================================================
@@ -40,7 +42,9 @@ CREATE TABLE ADMINS (
     first_name      VARCHAR2(100) NOT NULL,
     last_name       VARCHAR2(100) NOT NULL,
     pass            VARCHAR2(255) NOT NULL,
-    email           VARCHAR2(100) UNIQUE NOT NULL
+    email           VARCHAR2(100) UNIQUE NOT NULL,
+    reset_token     VARCHAR2(255),
+    reset_token_expiry TIMESTAMP
 );
 
 -- ============================================================================
@@ -66,6 +70,8 @@ CREATE TABLE LIBRARIAN (
     pass            VARCHAR2(255) NOT NULL,
     email           VARCHAR2(100) UNIQUE NOT NULL,
     admin_id        NUMBER,
+    reset_token     VARCHAR2(255),
+    reset_token_expiry TIMESTAMP,
     CONSTRAINT fk_lib_admin FOREIGN KEY (admin_id) REFERENCES ADMINS(admin_id)
 );
 

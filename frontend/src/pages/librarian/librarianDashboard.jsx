@@ -56,10 +56,10 @@ export default function LibrarianDashboard() {
         {/* Welcome Section */}
         <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
           <h2 className="text-2xl font-bold text-[#8b0000]">
-            Welcome, {user?.FIRST_NAME || "Librarian"}! 👋
+            Welcome, {user?.firstName || user?.FIRST_NAME || "Librarian"}! 👋
           </h2>
           <p className="text-gray-600 mt-2">
-            Librarian ID: {user?.LIBRARIAN_ID}
+            Librarian ID: {user?.librarianId || user?.LIBRARIAN_ID}
           </p>
         </div>
 

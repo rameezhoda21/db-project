@@ -14,7 +14,8 @@ $sqlFiles = @(
     "01_create_tables.sql",
     "02_views_oracle.sql",
     "03_triggers.sql",
-    "04_login_credentials.sql"
+    "04_login_credentials.sql",
+    "05_authentication.sql"
 )
 
 Write-Host "Database Path: $PSScriptRoot"

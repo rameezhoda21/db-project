@@ -11,16 +11,17 @@ export default function Fines() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (user?.ERP_ID) {
-      fetchFines();
-      fetchTotalFine();
+    const erpId = user?.erpId || user?.ERP_ID;
+    if (erpId) {
+      fetchFines(erpId);
+      fetchTotalFine(erpId);
     }
   }, [user]);
 
-  const fetchFines = async () => {
+  const fetchFines = async (erpId) => {
     try {
       setLoading(true);
-      const res = await api.get(`/student/fines/${user.ERP_ID}`);
+      const res = await api.get(`/student/fines/${erpId}`);
       // Assuming the backend returns an array of fines with book details
       setFines(res.data.fines || []);
     } catch (err) {
@@ -31,9 +32,9 @@ export default function Fines() {
     }
   };
 
-  const fetchTotalFine = async () => {
+  const fetchTotalFine = async (erpId) => {
     try {
-      const res = await api.get(`/student/fines/${user.ERP_ID}`);
+      const res = await api.get(`/student/fines/${erpId}`);
       setTotalFine(res.data?.FINE_DUE || 0);
     } catch (err) {
       console.error("Error fetching total fine:", err);

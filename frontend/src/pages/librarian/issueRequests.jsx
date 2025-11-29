@@ -27,7 +27,8 @@ export default function IssueRequests() {
   };
 
   const handleApprove = async (borrowId) => {
-    if (!user?.LIBRARIAN_ID) {
+    const librarianId = user?.librarianId || user?.LIBRARIAN_ID;
+    if (!librarianId) {
       setMessage("Error: Librarian not logged in");
       return;
     }
@@ -35,7 +36,7 @@ export default function IssueRequests() {
     try {
       setMessage("");
       await api.post(`/librarian/requests/approve/${borrowId}`, {
-        librarian_id: user.LIBRARIAN_ID,
+        librarian_id: librarianId,
       });
       setMessage(`✅ Book issued successfully!`);
       

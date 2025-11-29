@@ -13,13 +13,14 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user?.ERP_ID) {
-      fetchDashboardData();
+    const erpId = user?.erpId || user?.ERP_ID;
+    if (erpId) {
+      fetchDashboardData(erpId);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async (erpId) => {
     try {
       setLoading(true);
       
@@ -27,10 +28,10 @@ export default function StudentDashboard() {
       const booksRes = await api.get("/student/books");
       
       // Fetch borrowed books
-      const borrowedRes = await api.get(`/student/borrowed/${user.ERP_ID}`);
+      const borrowedRes = await api.get(`/student/borrowed/${erpId}`);
       
       // Fetch fines
-      const fineRes = await api.get(`/student/fines/${user.ERP_ID}`);
+      const fineRes = await api.get(`/student/fines/${erpId}`);
       
       setStats({
         totalBooks: booksRes.data?.length || 0,
@@ -89,10 +90,10 @@ export default function StudentDashboard() {
         {/* Welcome Section */}
         <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
           <h2 className="text-2xl font-bold text-[#8b0000]">
-            Welcome, {user?.FIRST_NAME || "Student"}! 👋
+            Welcome, {user?.firstName || user?.FIRST_NAME || "Student"}! 👋
           </h2>
           <p className="text-gray-600 mt-2">
-            Your Student ID: {user?.ERP_ID}
+            Your Student ID: {user?.erpId || user?.ERP_ID}
           </p>
         </div>
 

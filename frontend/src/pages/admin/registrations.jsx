@@ -75,14 +75,13 @@ export default function Registrations() {
         )}
 
         {/* Info Box */}
-        <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-6 mb-6">
-          <h3 className="font-bold text-yellow-800 text-lg mb-2">
-            🚧 Feature Coming Soon
+        <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 mb-6">
+          <h3 className="font-bold text-blue-800 text-lg mb-2">
+            ℹ️ Registration Approval System
           </h3>
-          <p className="text-yellow-700">
-            This page will display pending registration requests from students and
-            librarians. Once the authentication and registration system is implemented,
-            you'll be able to approve or reject user signups from here.
+          <p className="text-blue-700">
+            Review and approve/reject registration requests from students and librarians.
+            Once approved, users will be able to log in with their email and password.
           </p>
         </div>
 
@@ -110,6 +109,7 @@ export default function Registrations() {
                     <th className="p-3">Name</th>
                     <th className="p-3">Email</th>
                     <th className="p-3">Role</th>
+                    <th className="p-3">ERP ID</th>
                     <th className="p-3">Requested On</th>
                     <th className="p-3">Actions</th>
                   </tr>
@@ -117,28 +117,49 @@ export default function Registrations() {
                 <tbody>
                   {registrations.map((reg) => (
                     <tr
-                      key={reg.id}
+                      key={reg.USER_ID}
                       className="border-t border-gray-200 hover:bg-gray-50"
                     >
-                      <td className="p-3">{reg.id}</td>
-                      <td className="p-3 font-semibold">{reg.name}</td>
-                      <td className="p-3">{reg.email}</td>
+                      <td className="p-3">{reg.USER_ID}</td>
+                      <td className="p-3 font-semibold">
+                        {reg.FIRST_NAME} {reg.LAST_NAME}
+                      </td>
+                      <td className="p-3">{reg.EMAIL}</td>
                       <td className="p-3">
-                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                          {reg.role}
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            reg.ROLE === "student"
+                              ? "bg-green-100 text-green-700"
+                              : reg.ROLE === "librarian"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-purple-100 text-purple-700"
+                          }`}
+                        >
+                          {reg.ROLE}
                         </span>
                       </td>
-                      <td className="p-3">{new Date(reg.created_at).toLocaleDateString()}</td>
+                      <td className="p-3">
+                        {reg.ROLE === "student" ? (
+                          <span className="font-mono font-semibold text-iba-red">
+                            {reg.ERP_ID || "N/A"}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        {new Date(reg.CREATED_AT).toLocaleDateString()}
+                      </td>
                       <td className="p-3">
                         <div className="flex gap-2">
                           <button
-                            onClick={() => handleApprove(reg.id)}
+                            onClick={() => handleApprove(reg.USER_ID)}
                             className="bg-green-600 text-white px-3 py-1 rounded-md hover:bg-green-700 font-semibold"
                           >
                             ✓ Approve
                           </button>
                           <button
-                            onClick={() => handleReject(reg.id)}
+                            onClick={() => handleReject(reg.USER_ID)}
                             className="bg-red-600 text-white px-3 py-1 rounded-md hover:bg-red-700 font-semibold"
                           >
                             ✗ Reject

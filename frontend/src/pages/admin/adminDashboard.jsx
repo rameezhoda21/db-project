@@ -35,6 +35,13 @@ export default function AdminDashboard() {
       path: "/admin/registrations",
       color: "bg-yellow-500",
     },
+    {
+      title: "Manage Fines",
+      description: "Process student fine payments",
+      icon: "💰",
+      path: "/admin/manage-fines",
+      color: "bg-red-500",
+    },
   ];
 
   return (
@@ -43,7 +50,7 @@ export default function AdminDashboard() {
       <header className="bg-iba-red text-white py-4 px-8 flex justify-between items-center shadow-md">
         <h1 className="text-2xl font-bold">🔐 Admin Dashboard</h1>
         <div className="flex items-center gap-4">
-          <span>Welcome, {user?.FIRST_NAME || "Admin"}</span>
+          <span>Welcome, {user?.firstName || user?.FIRST_NAME || "Admin"}</span>
           <button
             onClick={logout}
             className="bg-white text-iba-red font-semibold px-4 py-1 rounded hover:bg-gray-100 transition"

@@ -10,15 +10,16 @@ export default function BorrowedBooks() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    if (user?.ERP_ID) {
-      fetchBorrowed();
+    const erpId = user?.erpId || user?.ERP_ID;
+    if (erpId) {
+      fetchBorrowedBooks(erpId);
     }
   }, [user]);
 
-  const fetchBorrowed = async () => {
+  const fetchBorrowedBooks = async (erpId) => {
     try {
       setLoading(true);
-      const res = await api.get(`/student/borrowed/${user.ERP_ID}`);
+      const res = await api.get(`/student/borrowed/${erpId}`);
       setBorrowed(res.data);
     } catch (err) {
       console.error("Error fetching borrowed books:", err);

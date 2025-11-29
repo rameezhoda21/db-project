@@ -1,31 +1,99 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/authContext";
 
 export default function Login() {
+  const [searchParams] = useSearchParams();
   const [erpId, setErpId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("student");
+  const [role, setRole] = useState(searchParams.get("role") || "student");
+  const [useAdminId, setUseAdminId] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // Load saved credentials on mount
+  useEffect(() => {
+    const urlRole = searchParams.get("role");
+    if (urlRole) {
+      setRole(urlRole);
+      loadRememberedCredentials(urlRole);
+    } else {
+      const savedRole = localStorage.getItem("rememberedRole");
+      if (savedRole) {
+        setRole(savedRole);
+        loadRememberedCredentials(savedRole);
+      } else {
+        loadRememberedCredentials(role);
+      }
+    }
+  }, [searchParams]);
+
+  // Load role-specific remembered credentials
+  const loadRememberedCredentials = (userRole) => {
+    const savedEmail = localStorage.getItem(`rememberedEmail_${userRole}`);
+    const savedUseId = localStorage.getItem(`rememberedUseId_${userRole}`);
+    
+    if (savedEmail) {
+      if (savedUseId === "true" && userRole === "admin") {
+        setErpId(savedEmail);
+        setUseAdminId(true);
+      } else {
+        setEmail(savedEmail);
+      }
+      setRememberMe(true);
+    } else {
+      setRememberMe(false);
+    }
+  };
+
+  // Clear email/erpId and load credentials when role changes
+  useEffect(() => {
+    setEmail("");
+    setErpId("");
+    setUseAdminId(false);
+    loadRememberedCredentials(role);
+  }, [role]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    
     try {
-      const endpoint =
-        role === "student" ? "/auth/student" : 
-        role === "librarian" ? "/auth/librarian" : 
-        "/auth/admin";
-      const res = await api.post(endpoint, { erpId, password });
+      // Students and librarians use email, admin uses ID or email based on toggle
+      const res = await api.post("/auth/login", {
+        email: role !== "admin" ? email : (!useAdminId ? email : null),
+        erpId: role === "admin" && useAdminId ? erpId : (role === "admin" && !useAdminId ? email : null),
+        password,
+        role,
+      });
+      
+      // Store token
+      if (res.data.token) {
+        localStorage.setItem("token", res.data.token);
+      }
+
+      // Remember Me functionality (role-specific)
+      if (rememberMe) {
+        localStorage.setItem(`rememberedEmail_${role}`, useAdminId ? erpId : email);
+        localStorage.setItem(`rememberedUseId_${role}`, useAdminId.toString());
+        localStorage.setItem("rememberedRole", role);
+      } else {
+        localStorage.removeItem(`rememberedEmail_${role}`);
+        localStorage.removeItem(`rememberedUseId_${role}`);
+        // Don't remove rememberedRole unless all roles are cleared
+      }
+      
       login(res.data);
 
       if (role === "student") navigate("/student");
       else if (role === "librarian") navigate("/librarian");
       else if (role === "admin") navigate("/admin");
-    } catch {
-      setError("Invalid credentials");
+    } catch (err) {
+      setError(err.response?.data?.error || "Invalid credentials");
     }
   };
 
@@ -91,25 +159,48 @@ export default function Login() {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
-          <div>
-            <label className="block mb-1 font-semibold">
-              {role === "student" ? "ERP ID" : role === "admin" ? "Admin ID" : "Librarian ID"}
-            </label>
-            <input
-              type="text"
-              value={erpId}
-              onChange={(e) => setErpId(e.target.value)}
-              placeholder={
-                role === "student"
-                  ? "Enter ERP ID (e.g. 22001)"
-                  : role === "admin"
-                  ? "Enter Admin ID (e.g. 1)"
-                  : "Enter Librarian ID (e.g. 101)"
-              }
-              className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-iba-red focus:outline-none"
-              required
-            />
-          </div>
+          {role === "admin" ? (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block font-semibold">{useAdminId ? "Admin ID" : "Email"}</label>
+                <button
+                  type="button"
+                  onClick={() => { setUseAdminId(!useAdminId); setErpId(""); setEmail(""); }}
+                  className="text-xs text-iba-red hover:underline font-semibold"
+                >
+                  {useAdminId ? "Login with Email" : "Login with ID"}
+                </button>
+              </div>
+              <input
+                type={useAdminId ? "text" : "email"}
+                value={useAdminId ? erpId : email}
+                onChange={(e) => useAdminId ? setErpId(e.target.value) : setEmail(e.target.value)}
+                placeholder={useAdminId ? "Enter Admin ID (e.g. 1)" : "Enter your email"}
+                autoComplete={useAdminId ? "username" : "username email"}
+                name={useAdminId ? "adminId" : "email"}
+                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-iba-red focus:outline-none"
+                required
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="block mb-1 font-semibold">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={
+                  role === "student"
+                    ? "yourname@khi.iba.edu.pk"
+                    : "yourname@gmail.com"
+                }
+                autoComplete="username email"
+                name="email"
+                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-iba-red focus:outline-none"
+                required
+              />
+            </div>
+          )}
 
           <div>
             <label className="block mb-1 font-semibold">Password</label>
@@ -117,10 +208,25 @@ export default function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter Password"
+              placeholder="Enter your password"
+              autoComplete="current-password"
               className="w-full px-4 py-2 rounded-md border border-gray-300 focus:ring-2 focus:ring-iba-red focus:outline-none"
               required
             />
+          </div>
+
+          {/* Remember Me */}
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 text-iba-red border-gray-300 rounded focus:ring-iba-red focus:ring-2"
+            />
+            <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-700">
+              Remember me
+            </label>
           </div>
 
           {error && (
@@ -135,10 +241,26 @@ export default function Login() {
           >
             Login as {role === "student" ? "Student" : role === "librarian" ? "Librarian" : "Admin"}
           </button>
+
+          {/* Forgot Password */}
+          <Link
+            to={`/forgot-password?role=${role}`}
+            className="text-sm text-iba-red hover:underline font-semibold text-center mt-2 block"
+          >
+            Forgot Password?
+          </Link>
         </form>
 
+        {/* Sign Up Link */}
+        <div className="text-center text-gray-600 text-sm mt-6">
+          Don't have an account?{" "}
+          <Link to={`/signup?role=${role}`} className="text-iba-red font-semibold hover:underline">
+            Sign up here
+          </Link>
+        </div>
+
         {/* Footer */}
-        <div className="text-center text-gray-500 text-sm mt-6">
+        <div className="text-center text-gray-500 text-sm mt-4">
           Need help? Contact{" "}
           <a
             href="mailto:library@iba.edu.pk"
