@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/authContext"; // ✅ import the provider
 import Landing from "./pages/landing";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
+import PublicBooks from "./pages/publicBooks";
 import ForgotPassword from "./pages/forgotPassword";
 import ResetPassword from "./pages/resetPassword";
 import StudentDashboard from "./pages/student/studentDashboard";
@@ -31,6 +32,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/books" element={<PublicBooks />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

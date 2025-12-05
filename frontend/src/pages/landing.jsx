@@ -30,17 +30,13 @@ export default function Landing() {
           journals, and digital resources — anytime, anywhere.
         </p>
 
-        {/* 🔍 Search Bar */}
-        <div className="flex w-full max-w-xl bg-white shadow-md rounded-md overflow-hidden border border-gray-200">
-          <input
-            type="text"
-            placeholder="Search books, authors, or ISBN..."
-            className="flex-grow px-4 py-3 outline-none text-gray-700"
-          />
-          <button className="bg-iba-red text-white px-6 py-3 hover:bg-iba-dark transition">
-            Search
-          </button>
-        </div>
+        {/* 🔍 Browse Books Button */}
+        <Link
+          to="/books"
+          className="bg-iba-red text-white font-semibold px-8 py-4 rounded-md hover:bg-iba-dark transition shadow-lg text-lg"
+        >
+          Search Books
+        </Link>
       </header>
 
       {/* 📖 About Section */}
