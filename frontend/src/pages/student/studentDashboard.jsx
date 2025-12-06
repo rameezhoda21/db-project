@@ -138,13 +138,13 @@ export default function StudentDashboard() {
                       Currently Borrowed
                     </p>
                     <p className="text-4xl font-bold text-blue-600 mt-2">
-                      {stats.borrowedBooks}
+                      {stats.borrowedBooks} / 3
                     </p>
                   </div>
                   <div className="text-5xl">📖</div>
                 </div>
                 <p className="text-gray-500 text-xs mt-4">
-                  View your borrowed books
+                  {stats.borrowedBooks >= 3 ? "Maximum limit reached" : `${3 - stats.borrowedBooks} slots available`}
                 </p>
               </Link>
 
@@ -224,6 +224,18 @@ export default function StudentDashboard() {
                     pay your fine
                   </Link>{" "}
                   to continue borrowing books.
+                </p>
+              </div>
+            )}
+
+            {/* Borrow Limit Notice */}
+            {stats.borrowedBooks >= 3 && (
+              <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-2">
+                  📚 Maximum Borrow Limit Reached
+                </h3>
+                <p className="text-yellow-800">
+                  You have reached the maximum limit of 3 books. Please return a book before borrowing another one.
                 </p>
               </div>
             )}

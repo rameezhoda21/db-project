@@ -97,19 +97,6 @@ CREATE TABLE BORROW (
 );
 
 -- ============================================================================
--- RESERVATIONS TABLE
--- Students can reserve books that are currently unavailable
--- ============================================================================
-CREATE TABLE RESERVATIONS (
-    reservation_id      NUMBER PRIMARY KEY,
-    erp_id              NUMBER NOT NULL,
-    book_id             NUMBER NOT NULL,
-    reservation_date    DATE NOT NULL,
-    CONSTRAINT fk_res_student FOREIGN KEY (erp_id) REFERENCES STUDENTS(erp_id),
-    CONSTRAINT fk_res_book FOREIGN KEY (book_id) REFERENCES BOOKS(book_id)
-);
-
--- ============================================================================
 -- FINE TABLE
 -- Records all fines issued to students for late returns or damages
 -- ============================================================================

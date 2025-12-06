@@ -17,6 +17,21 @@ router.post("/borrow", async (req, res) => {
   const { erp_id, book_id } = req.body;
   console.log("📖 Borrow request - ERP:", erp_id, "Book:", book_id);
   try {
+    // Check current active borrows (PENDING + ISSUED)
+    const activeBorrows = await query(
+      "SELECT COUNT(*) as count FROM BORROW WHERE erp_id = :erp AND status IN ('PENDING', 'ISSUED')",
+      { erp: erp_id }
+    );
+    
+    const currentBorrowCount = activeBorrows.rows[0].COUNT;
+    const MAX_BORROW_LIMIT = 3;
+    
+    if (currentBorrowCount >= MAX_BORROW_LIMIT) {
+      return res.status(400).json({ 
+        error: `You have reached the maximum borrow limit of ${MAX_BORROW_LIMIT} books. Please return a book before borrowing another.` 
+      });
+    }
+    
     await query(
       "INSERT INTO BORROW (borrow_id, erp_id, book_id, status) VALUES (borrow_seq.NEXTVAL, :erp, :book, 'PENDING')",
       { erp: erp_id, book: book_id }
@@ -40,21 +55,6 @@ router.post("/return", async (req, res) => {
     res.json({ message: "Book returned successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
-  }
-});
-
-// 🔹 Reserve a book
-router.post("/reserve/:book_id", async (req, res) => {
-  const { erp_id } = req.body;
-  const { book_id } = req.params;
-  try {
-    await query(
-      "INSERT INTO RESERVATIONS (erp_id, book_id, reservation_date) VALUES (:erp, :book, SYSDATE)",
-      { erp: erp_id, book: book_id }
-    );
-    res.json({ message: "Book reserved successfully" });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
   }
 });
 

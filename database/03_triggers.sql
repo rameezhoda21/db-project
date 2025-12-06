@@ -13,8 +13,9 @@ Runs BEFORE a new row is inserted into the BORROW table.
 Handles business rules for PENDING requests:
 1. Checks if the student has outstanding fines
 2. Checks if the book is in stock (available_copies > 0)
-3. For PENDING requests, doesn't set dates or reduce copies yet
-4. For ISSUED requests (direct issue by librarian), sets dates and reduces copies
+3. Checks if student has reached max borrow limit (3 books)
+4. For PENDING requests, doesn't set dates or reduce copies yet
+5. For ISSUED requests (direct issue by librarian), sets dates and reduces copies
 */
 CREATE OR REPLACE TRIGGER trg_borrow_before_insert
 BEFORE INSERT ON BORROW
@@ -22,8 +23,10 @@ FOR EACH ROW
 DECLARE
     v_fine_due STUDENTS.fine_due%TYPE;
     v_available_copies BOOKS.available_copies%TYPE;
+    v_active_borrows NUMBER;
+    v_max_borrow_limit CONSTANT NUMBER := 3;
 BEGIN
-    -- Only check fines for pending requests (not when librarian issues)
+    -- Only check fines and limits for pending requests (not when librarian issues)
     IF :NEW.status = 'PENDING' THEN
         -- Check for outstanding fines
         SELECT fine_due
@@ -33,6 +36,17 @@ BEGIN
 
         IF v_fine_due > 0 THEN
             RAISE_APPLICATION_ERROR(-20001, 'You have an outstanding fine of Rs ' || v_fine_due || '. Please pay fines before borrowing.');
+        END IF;
+
+        -- Check max borrow limit (count PENDING + ISSUED books)
+        SELECT COUNT(*)
+        INTO v_active_borrows
+        FROM BORROW
+        WHERE erp_id = :NEW.erp_id
+          AND status IN ('PENDING', 'ISSUED');
+
+        IF v_active_borrows >= v_max_borrow_limit THEN
+            RAISE_APPLICATION_ERROR(-20003, 'You have reached the maximum borrow limit of ' || v_max_borrow_limit || ' books. Please return a book before borrowing another.');
         END IF;
 
         -- Check book availability
