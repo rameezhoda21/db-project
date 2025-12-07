@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
+import { showError } from "../utils/toast";
 
 export default function PublicBooks() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     api
@@ -15,7 +15,7 @@ export default function PublicBooks() {
         setLoading(false);
       })
       .catch((err) => {
-        setError("Failed to load books");
+        showError("Failed to load books");
         setLoading(false);
       });
   }, []);
@@ -51,19 +51,13 @@ export default function PublicBooks() {
             </div>
           )}
 
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
-
-          {!loading && !error && books.length === 0 && (
+          {!loading && books.length === 0 && (
             <div className="text-center py-12">
               <p className="text-gray-600">No books available in the library.</p>
             </div>
           )}
 
-          {!loading && !error && books.length > 0 && (
+          {!loading && books.length > 0 && (
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full">

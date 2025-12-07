@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/authContext";
+import { showSuccess, showError, showWarning } from "../../utils/toast";
+import ConfirmModal from "../../components/ConfirmModal";
 
 export default function ReturnBook() {
   const { logout } = useAuth();
   const [activeBorrows, setActiveBorrows] = useState([]);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("success");
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [borrowToReturn, setBorrowToReturn] = useState(null);
 
   useEffect(() => {
     fetchActiveBorrows();
@@ -22,24 +24,24 @@ export default function ReturnBook() {
     }
   };
 
-  const handleReturn = async (borrowId) => {
-    if (!window.confirm("Are you sure you want to process this return?")) return;
+  const handleReturn = (borrowId) => {
+    setBorrowToReturn(borrowId);
+    setShowReturnModal(true);
+  };
 
+  const confirmReturn = async () => {
     try {
-      const res = await api.post("/librarian/return", { borrowId });
+      const res = await api.post("/librarian/return", { borrowId: borrowToReturn });
       
       if (res.data.fine) {
-        setMessage(`${res.data.message} - Fine: Rs ${res.data.fine}`);
-        setMessageType("warning");
+        showWarning(`${res.data.message} - Fine: Rs ${res.data.fine}`);
       } else {
-        setMessage(res.data.message);
-        setMessageType("success");
+        showSuccess(res.data.message);
       }
       
       fetchActiveBorrows();
     } catch (err) {
-      setMessage(err.response?.data?.error || "Error processing return");
-      setMessageType("error");
+      showError(err.response?.data?.error || "Error processing return");
     }
   };
 
@@ -80,13 +82,6 @@ export default function ReturnBook() {
           <h2 className="text-3xl font-bold text-[#8b0000]">📥 Return Book</h2>
           <p className="text-gray-600 mt-1">Process book returns and calculate fines</p>
         </div>
-
-        {/* Message */}
-        {message && (
-          <div className={`px-4 py-3 rounded-md ${messageType === "success" ? "bg-green-100 text-green-800 border border-green-300" : messageType === "warning" ? "bg-yellow-100 text-yellow-800 border border-yellow-300" : "bg-red-100 text-red-800 border border-red-300"}`}>
-            {message}
-          </div>
-        )}
 
         {/* Active Borrows Table */}
         <div className="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
@@ -164,6 +159,17 @@ export default function ReturnBook() {
           </ul>
         </div>
       </main>
+
+      {/* Return Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showReturnModal}
+        onClose={() => setShowReturnModal(false)}
+        onConfirm={confirmReturn}
+        title="Process Return"
+        message="Are you sure you want to process this book return? Late fees will be calculated automatically if overdue."
+        confirmText="Process Return"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

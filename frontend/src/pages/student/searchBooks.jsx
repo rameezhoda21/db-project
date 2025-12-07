@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/authContext";
+import { showSuccess, showError } from "../../utils/toast";
 
 export default function SearchBooks() {
   const { user, logout } = useAuth();
   const [books, setBooks] = useState([]);
   const [search, setSearch] = useState("");
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     fetchBooks();
@@ -19,32 +19,26 @@ export default function SearchBooks() {
       setBooks(res.data);
     } catch (err) {
       console.error("Error fetching books:", err);
-      setMessage("Error loading books.");
+      showError("Error loading books.");
     }
   };
 
   const handleBorrow = async (bookId) => {
     const erpId = user?.erpId || user?.ERP_ID;
     if (!erpId) {
-      setMessage("Error: Not logged in");
+      showError("Error: Not logged in");
       return;
     }
 
     try {
-      setMessage("");
       const res = await api.post("/student/borrow", {
         erp_id: erpId,
         book_id: bookId,
       });
-      setMessage("✅ " + res.data.message);
-      
-      // Clear message after 3 seconds
-      setTimeout(() => {
-        setMessage("");
-      }, 3000);
+      showSuccess(res.data.message);
     } catch (err) {
       console.error("Error creating borrow request:", err);
-      setMessage(
+      showError(
         err.response?.data?.error || "Error creating request. You may have unpaid fines."
       );
     }
@@ -107,19 +101,6 @@ export default function SearchBooks() {
             Browse and search through our library collection
           </p>
         </div>
-
-        {/* Notification Message */}
-        {message && (
-          <div className={`px-4 py-3 rounded-md text-center border ${
-            message.includes("✅") 
-              ? "bg-green-100 text-green-800 border-green-300" 
-              : message.includes("Error") || message.includes("fines")
-              ? "bg-red-100 text-red-800 border-red-300"
-              : "bg-blue-100 text-blue-800 border-blue-300"
-          }`}>
-            {message}
-          </div>
-        )}
 
         {/* Search Bar */}
         <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">

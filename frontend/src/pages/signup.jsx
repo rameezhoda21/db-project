@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import api from "../services/api";
+import { showSuccess, showError } from "../utils/toast";
 
 export default function Signup() {
   const [searchParams] = useSearchParams();
@@ -13,39 +14,34 @@ export default function Signup() {
     erpId: "",
     role: searchParams.get("role") || "student",
   });
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setSuccess("");
 
     // Client-side validation
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      showError("Passwords do not match");
       return;
     }
 
     if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      showError("Password must be at least 8 characters long");
       return;
     }
 
     // Email validation by role
     if (formData.role === "student" && !formData.email.endsWith("@khi.iba.edu.pk")) {
-      setError("Student email must be an IBA email (@khi.iba.edu.pk)");
+      showError("Student email must be an IBA email (@khi.iba.edu.pk)");
       return;
     }
 
     if ((formData.role === "librarian" || formData.role === "admin") && !formData.email.endsWith("@gmail.com")) {
-      setError(`${formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} email must be a Gmail address`);
+      showError(`${formData.role.charAt(0).toUpperCase() + formData.role.slice(1)} email must be a Gmail address`);
       return;
     }
 
@@ -59,14 +55,14 @@ export default function Signup() {
         role: formData.role,
       });
 
-      setSuccess(res.data.message);
+      showSuccess(res.data.message + " - Redirecting to login...");
       
       // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate(`/login?role=${formData.role}`);
       }, 3000);
     } catch (err) {
-      setError(err.response?.data?.error || "Registration failed. Please try again.");
+      showError(err.response?.data?.error || "Registration failed. Please try again.");
     }
   };
 
@@ -229,20 +225,6 @@ export default function Signup() {
               minLength={8}
             />
           </div>
-
-          {error && (
-            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-md py-2 px-3">
-              {error}
-            </div>
-          )}
-
-          {success && (
-            <div className="text-green-600 text-sm bg-green-50 border border-green-200 rounded-md py-2 px-3">
-              {success}
-              <br />
-              <span className="text-xs">Redirecting to login...</span>
-            </div>
-          )}
 
           <button
             type="submit"

@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/authContext";
+import { showSuccess, showError } from "../../utils/toast";
 
 export default function IssueRequests() {
   const { user, logout } = useAuth();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     fetchRequests();
@@ -20,7 +20,7 @@ export default function IssueRequests() {
       setRequests(res.data);
     } catch (err) {
       console.error("Error fetching requests:", err);
-      setMessage("Error loading pending requests.");
+      showError("Error loading pending requests.");
     } finally {
       setLoading(false);
     }
@@ -29,25 +29,23 @@ export default function IssueRequests() {
   const handleApprove = async (borrowId) => {
     const librarianId = user?.librarianId || user?.LIBRARIAN_ID;
     if (!librarianId) {
-      setMessage("Error: Librarian not logged in");
+      showError("Error: Librarian not logged in");
       return;
     }
 
     try {
-      setMessage("");
       await api.post(`/librarian/requests/approve/${borrowId}`, {
         librarian_id: librarianId,
       });
-      setMessage(`✅ Book issued successfully!`);
+      showSuccess("Book issued successfully!");
       
       // Refresh requests
       setTimeout(() => {
         fetchRequests();
-        setMessage("");
-      }, 1500);
+      }, 1000);
     } catch (err) {
       console.error("Error approving request:", err);
-      setMessage(err.response?.data?.error || "Error issuing book.");
+      showError(err.response?.data?.error || "Error issuing book.");
     }
   };
 
@@ -88,17 +86,6 @@ export default function IssueRequests() {
             Review and approve student borrow requests
           </p>
         </div>
-
-        {/* Message */}
-        {message && (
-          <div className={`px-4 py-3 rounded-md border ${
-            message.includes("✅") 
-              ? "bg-green-100 text-green-800 border-green-300" 
-              : "bg-red-100 text-red-800 border-red-300"
-          }`}>
-            {message}
-          </div>
-        )}
 
         {/* Loading State */}
         {loading ? (

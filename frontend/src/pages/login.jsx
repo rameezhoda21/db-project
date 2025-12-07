@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/authContext";
+import { showError, showSuccess } from "../utils/toast";
 
 export default function Login() {
   const [searchParams] = useSearchParams();
@@ -11,7 +12,6 @@ export default function Login() {
   const [role, setRole] = useState(searchParams.get("role") || "student");
   const [useAdminId, setUseAdminId] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -60,7 +60,6 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     
     try {
       // Students and librarians use email, admin uses ID or email based on toggle
@@ -89,11 +88,15 @@ export default function Login() {
       
       login(res.data);
 
+      // Show welcome toast
+      const userName = res.data.user?.firstName || res.data.user?.FIRST_NAME || "User";
+      showSuccess(`Welcome back, ${userName}!`);
+
       if (role === "student") navigate("/student");
       else if (role === "librarian") navigate("/librarian");
       else if (role === "admin") navigate("/admin");
     } catch (err) {
-      setError(err.response?.data?.error || "Invalid credentials");
+      showError(err.response?.data?.error || "Invalid credentials");
     }
   };
 
@@ -228,12 +231,6 @@ export default function Login() {
               Remember me
             </label>
           </div>
-
-          {error && (
-            <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-md py-2 px-3">
-              {error}
-            </p>
-          )}
 
           <button
             type="submit"

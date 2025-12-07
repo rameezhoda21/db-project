@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/authContext";
+import { showSuccess, showError } from "../../utils/toast";
+import ConfirmModal from "../../components/ConfirmModal";
 
 export default function ManageBooks() {
   const { logout } = useAuth();
   const [books, setBooks] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [message, setMessage] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState(null);
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
@@ -25,7 +28,7 @@ export default function ManageBooks() {
       const res = await api.get("/librarian/books");
       setBooks(res.data);
     } catch (err) {
-      setMessage("Error loading books");
+      showError("Error loading books");
     }
   };
 
@@ -33,7 +36,7 @@ export default function ManageBooks() {
     e.preventDefault();
     try {
       const res = await api.post("/librarian/books", newBook);
-      setMessage(res.data.message);
+      showSuccess(res.data.message);
       setNewBook({
         title: "",
         author: "",
@@ -44,20 +47,23 @@ export default function ManageBooks() {
       setShowAddModal(false);
       fetchBooks();
     } catch (err) {
-      setMessage("Error adding book");
+      showError("Error adding book");
     }
   };
 
-  const handleDeleteBook = async (bookId) => {
-    if (!window.confirm("Are you sure you want to delete this book?")) return;
-    
+  const handleDeleteBook = (bookId) => {
+    setBookToDelete(bookId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
     try {
-      const res = await api.delete(`/librarian/books/${bookId}`);
-      setMessage(`✅ ${res.data.message}`);
+      const res = await api.delete(`/librarian/books/${bookToDelete}`);
+      showSuccess(res.data.message);
       fetchBooks();
     } catch (err) {
       console.error("Error deleting book:", err);
-      setMessage(err.response?.data?.error || "Error deleting book");
+      showError(err.response?.data?.error || "Error deleting book");
     }
   };
 
@@ -110,13 +116,6 @@ export default function ManageBooks() {
             + Add New Book
           </button>
         </div>
-
-        {/* Message */}
-        {message && (
-          <div className="bg-green-100 text-green-800 border border-green-300 px-4 py-3 rounded-md">
-            {message}
-          </div>
-        )}
 
         {/* Books Table */}
         <div className="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
@@ -244,6 +243,17 @@ export default function ManageBooks() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDelete}
+        title="Delete Book"
+        message="Are you sure you want to delete this book? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

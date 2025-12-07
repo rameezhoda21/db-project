@@ -2,14 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/authContext";
+import { showSuccess, showError } from "../../utils/toast";
 
 export default function IssueBook() {
   const { logout } = useAuth();
   const [books, setBooks] = useState([]);
   const [erpId, setErpId] = useState("");
   const [bookId, setBookId] = useState("");
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("success");
 
   useEffect(() => {
     fetchBooks();
@@ -33,14 +32,12 @@ export default function IssueBook() {
         bookId: parseInt(bookId),
       });
       
-      setMessage(res.data.message);
-      setMessageType("success");
+      showSuccess(res.data.message);
       setErpId("");
       setBookId("");
       fetchBooks();
     } catch (err) {
-      setMessage(err.response?.data?.error || "Error issuing book");
-      setMessageType("error");
+      showError(err.response?.data?.error || "Error issuing book");
     }
   };
 
@@ -81,13 +78,6 @@ export default function IssueBook() {
           <h2 className="text-3xl font-bold text-[#8b0000]">📤 Issue Book to Student</h2>
           <p className="text-gray-600 mt-1">Enter student ERP ID and select a book</p>
         </div>
-
-        {/* Message */}
-        {message && (
-          <div className={`px-4 py-3 rounded-md ${messageType === "success" ? "bg-green-100 text-green-800 border border-green-300" : "bg-red-100 text-red-800 border border-red-300"}`}>
-            {message}
-          </div>
-        )}
 
         {/* Issue Form */}
         <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">

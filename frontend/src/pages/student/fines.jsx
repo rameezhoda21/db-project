@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/authContext";
+import { showError } from "../../utils/toast";
 
 export default function Fines() {
   const { user, logout } = useAuth();
   const [fines, setFines] = useState([]);
   const [totalFine, setTotalFine] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const erpId = user?.erpId || user?.ERP_ID;
@@ -26,7 +26,7 @@ export default function Fines() {
       setFines(res.data.fines || []);
     } catch (err) {
       console.error("Error fetching fines:", err);
-      setMessage("Error loading fine details.");
+      showError("Error loading fine details.");
     } finally {
       setLoading(false);
     }
@@ -109,19 +109,6 @@ export default function Fines() {
             View all fines for books returned after the due date
           </p>
         </div>
-
-        {/* Message */}
-        {message && (
-          <div
-            className={`px-4 py-3 rounded-md ${
-              message.includes("successfully")
-                ? "bg-green-100 text-green-800 border border-green-300"
-                : "bg-red-100 text-red-800 border border-red-300"
-            }`}
-          >
-            {message}
-          </div>
-        )}
 
         {/* Total Fine Card */}
         <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">

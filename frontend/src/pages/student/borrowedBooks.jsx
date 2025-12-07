@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { useAuth } from "../../context/authContext";
+import { showError } from "../../utils/toast";
 
 export default function BorrowedBooks() {
   const { user, logout } = useAuth();
   const [borrowed, setBorrowed] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const erpId = user?.erpId || user?.ERP_ID;
@@ -23,7 +23,7 @@ export default function BorrowedBooks() {
       setBorrowed(res.data);
     } catch (err) {
       console.error("Error fetching borrowed books:", err);
-      setMessage("Error loading borrowed books.");
+      showError("Error loading borrowed books.");
     } finally {
       setLoading(false);
     }
@@ -97,13 +97,6 @@ export default function BorrowedBooks() {
             View your borrow requests and issued books
           </p>
         </div>
-
-        {/* Message */}
-        {message && (
-          <div className="bg-red-100 text-red-800 border border-red-300 px-4 py-3 rounded-md">
-            {message}
-          </div>
-        )}
 
         {/* Loading State */}
         {loading ? (

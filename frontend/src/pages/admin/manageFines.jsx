@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import { showSuccess, showError } from "../../utils/toast";
+import ConfirmModal from "../../components/ConfirmModal";
 
 export default function ManageFines() {
   const [fines, setFines] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [processingFineId, setProcessingFineId] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [fineToMarkPaid, setFineToMarkPaid] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -19,24 +22,25 @@ export default function ManageFines() {
       setFines(res.data);
       setLoading(false);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to fetch fines");
+      showError(err.response?.data?.error || "Failed to fetch fines");
       setLoading(false);
     }
   };
 
-  const handleMarkAsPaid = async (fineId) => {
-    if (!window.confirm("Confirm that the student has paid this fine in cash?")) {
-      return;
-    }
+  const handleMarkAsPaid = (fineId) => {
+    setFineToMarkPaid(fineId);
+    setShowPaymentModal(true);
+  };
 
-    setProcessingFineId(fineId);
+  const confirmPayment = async () => {
+    setProcessingFineId(fineToMarkPaid);
     try {
-      await api.post(`/admin/fines/${fineId}/pay`);
-      alert("Fine marked as paid successfully!");
+      await api.post(`/admin/fines/${fineToMarkPaid}/pay`);
+      showSuccess("Fine marked as paid successfully!");
       // Remove fine from list
-      setFines(fines.filter(f => f.FINE_ID !== fineId));
+      setFines(fines.filter(f => f.FINE_ID !== fineToMarkPaid));
     } catch (err) {
-      alert(err.response?.data?.error || "Failed to mark fine as paid");
+      showError(err.response?.data?.error || "Failed to mark fine as paid");
     } finally {
       setProcessingFineId(null);
     }
@@ -73,12 +77,6 @@ export default function ManageFines() {
             ← Back to Dashboard
           </button>
         </div>
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
-          </div>
-        )}
 
         {/* Summary */}
         <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -205,6 +203,17 @@ export default function ManageFines() {
           </ol>
         </div>
       </div>
+
+      {/* Payment Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onConfirm={confirmPayment}
+        title="Confirm Payment"
+        message="Confirm that the student has paid this fine in cash? This will clear their outstanding fine."
+        confirmText="Mark as Paid"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

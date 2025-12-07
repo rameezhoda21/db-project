@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api from "../services/api";
+import { showSuccess, showError } from "../utils/toast";
 
 export default function ForgotPassword() {
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState(searchParams.get("role") || "student");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
     setLoading(true);
 
     try {
@@ -21,10 +18,10 @@ export default function ForgotPassword() {
         email,
         role,
       });
-      setMessage(res.data.message);
+      showSuccess(res.data.message);
       setEmail("");
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to send reset link");
+      showError(err.response?.data?.error || "Failed to send reset link");
     } finally {
       setLoading(false);
     }
@@ -111,18 +108,6 @@ export default function ForgotPassword() {
               required
             />
           </div>
-
-          {message && (
-            <div className="text-green-600 text-sm bg-green-50 border border-green-200 rounded-md py-3 px-3">
-              {message}
-            </div>
-          )}
-
-          {error && (
-            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-md py-3 px-3">
-              {error}
-            </div>
-          )}
 
           <button
             type="submit"

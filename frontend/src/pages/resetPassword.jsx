@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import api from "../services/api";
+import { showSuccess, showError } from "../utils/toast";
 
 export default function ResetPassword() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -14,22 +13,20 @@ export default function ResetPassword() {
 
   useEffect(() => {
     if (!token) {
-      setError("Invalid reset link. Please request a new password reset.");
+      showError("Invalid reset link. Please request a new password reset.");
     }
   }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    setMessage("");
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      showError("Passwords do not match");
       return;
     }
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
+      showError("Password must be at least 8 characters long");
       return;
     }
 
@@ -40,12 +37,12 @@ export default function ResetPassword() {
         token,
         newPassword: password,
       });
-      setMessage(res.data.message);
+      showSuccess(res.data.message + " - Redirecting to login...");
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to reset password");
+      showError(err.response?.data?.error || "Failed to reset password");
     } finally {
       setLoading(false);
     }
@@ -104,18 +101,6 @@ export default function ResetPassword() {
               disabled={!token}
             />
           </div>
-
-          {message && (
-            <div className="text-green-600 text-sm bg-green-50 border border-green-200 rounded-md py-3 px-3">
-              {message}
-            </div>
-          )}
-
-          {error && (
-            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-md py-3 px-3">
-              {error}
-            </div>
-          )}
 
           <button
             type="submit"
