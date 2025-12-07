@@ -40,7 +40,26 @@ router.post("/borrow", async (req, res) => {
     res.json({ message: "Request submitted! Go to the counter to collect your book." });
   } catch (err) {
     console.error("❌ Error creating borrow request:", err);
-    res.status(400).json({ error: err.message });
+    
+    // Extract user-friendly message from Oracle error
+    let errorMessage = err.message;
+    
+    // Check if it's an Oracle error with a custom message
+    if (errorMessage.includes('ORA-20001')) {
+      // Fine error - extract the message after ORA-20001:
+      const match = errorMessage.match(/ORA-20001:\s*(.+?)(?:\n|ORA-|$)/);
+      errorMessage = match ? match[1].trim() : "You have outstanding fines. Please pay fines before borrowing.";
+    } else if (errorMessage.includes('ORA-20003')) {
+      // Max borrow limit error
+      const match = errorMessage.match(/ORA-20003:\s*(.+?)(?:\n|ORA-|$)/);
+      errorMessage = match ? match[1].trim() : "You have reached the maximum borrow limit.";
+    } else if (errorMessage.includes('ORA-20002')) {
+      // Book unavailable error
+      const match = errorMessage.match(/ORA-20002:\s*(.+?)(?:\n|ORA-|$)/);
+      errorMessage = match ? match[1].trim() : "This book is currently unavailable.";
+    }
+    
+    res.status(400).json({ error: errorMessage });
   }
 });
 
