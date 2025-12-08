@@ -236,60 +236,6 @@ router.post("/requests/approve/:borrow_id", async (req, res) => {
   }
 });
 
-// 📤 Issue book to student (trigger will set due_date and decrement available_copies)
-router.post("/issue", async (req, res) => {
-  const { erpId, bookId } = req.body;
-
-  try {
-    // Check if student exists
-    const studentCheck = await query(
-      "SELECT erp_id, fine_due FROM STUDENTS WHERE erp_id = :erp",
-      { erp: erpId }
-    );
-
-    if (studentCheck.rows.length === 0) {
-      return res.status(404).json({ error: "Student not found" });
-    }
-
-    // Check if book exists and is available
-    const bookCheck = await query(
-      "SELECT available_copies FROM BOOKS WHERE book_id = :id",
-      { id: bookId }
-    );
-
-    if (bookCheck.rows.length === 0) {
-      return res.status(404).json({ error: "Book not found" });
-    }
-
-    if (bookCheck.rows[0].AVAILABLE_COPIES <= 0) {
-      return res.status(400).json({ error: "No copies available" });
-    }
-
-    // Insert borrow record (trigger will handle due_date and available_copies)
-    await query(
-      `INSERT INTO BORROW (borrow_id, erp_id, book_id, issue_date) 
-       VALUES (borrow_seq.NEXTVAL, :erp, :book, SYSDATE)`,
-      { erp: erpId, book: bookId }
-    );
-
-    res.json({ 
-      message: "Book issued successfully",
-      borrowId: nextId
-    });
-  } catch (err) {
-    console.error("❌ Error issuing book:", err);
-    
-    // Handle trigger errors
-    if (err.message.includes("ORA-20001")) {
-      return res.status(400).json({ 
-        error: "Student has outstanding fines. Please clear fines before borrowing." 
-      });
-    }
-    
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // 📥 Return book (trigger will calculate fine if late)
 router.post("/return", async (req, res) => {
   const { borrowId } = req.body;

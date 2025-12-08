@@ -11,7 +11,6 @@ import PublicBooks from "./pages/publicBooks";
 import ForgotPassword from "./pages/forgotPassword";
 import ResetPassword from "./pages/resetPassword";
 import StudentDashboard from "./pages/student/studentDashboard";
-import BrowseBooks from "./pages/student/browseBooks";
 import SearchBooks from "./pages/student/searchBooks";
 import BorrowedBooks from "./pages/student/borrowedBooks";
 import Fines from "./pages/student/fines";
@@ -41,7 +40,6 @@ function App() {
           
           {/* Student Routes */}
           <Route path="/student" element={<StudentDashboard />} />
-          <Route path="/student/books" element={<BrowseBooks />} />
           <Route path="/student/search-books" element={<SearchBooks />} />
           <Route path="/student/borrowed-books" element={<BorrowedBooks />} />
           <Route path="/student/fines" element={<Fines />} />

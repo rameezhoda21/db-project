@@ -153,19 +153,4 @@ router.get("/fines/:erp_id", async (req, res) => {
   }
 });
 
-// 🔹 Pay a fine (trigger updates STUDENTS.fine_due)
-router.post("/payfine/:erp_id", async (req, res) => {
-  const { erp_id } = req.params;
-  try {
-    // Pay all unpaid fines for this student
-    await query(
-      "UPDATE FINE SET paid = 1 WHERE erp_id = :erp AND paid = 0",
-      { erp: erp_id }
-    );
-    res.json({ message: "Fine paid successfully" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 export default router;
