@@ -19,7 +19,6 @@ router.get("/inventory", getInventory);
 // Import new admin methods
 import {
   getBorrows,
-  getRecentActivities,
   getPendingRegistrations,
   approveRegistration,
   rejectRegistration,
@@ -27,7 +26,6 @@ import {
 
 // New admin dashboard routes
 router.get("/borrows", getBorrows);
-router.get("/recent-activities", getRecentActivities);
 router.get("/registrations", getPendingRegistrations);
 router.post("/registrations/:id/approve", approveRegistration);
 router.post("/registrations/:id/reject", rejectRegistration);

@@ -6,6 +6,7 @@ import { showError } from "../utils/toast";
 export default function PublicBooks() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     api
@@ -19,6 +20,14 @@ export default function PublicBooks() {
         setLoading(false);
       });
   }, []);
+
+  // Filter books by search query
+  const filteredBooks = books.filter(
+    (book) =>
+      book.TITLE?.toLowerCase().includes(search.toLowerCase()) ||
+      book.AUTHOR?.toLowerCase().includes(search.toLowerCase()) ||
+      book.GENRE?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="bg-iba-light min-h-screen text-iba-dark flex flex-col">
@@ -41,9 +50,20 @@ export default function PublicBooks() {
           <h1 className="text-3xl md:text-4xl font-bold text-iba-red mb-2">
             Book Inventory
           </h1>
-          <p className="text-gray-600 mb-8">
+          <p className="text-gray-600 mb-6">
             Browse our complete collection of books. Login to borrow books.
           </p>
+
+          {/* Search Bar */}
+          <div className="bg-white shadow-md rounded-lg p-4 mb-6">
+            <input
+              type="text"
+              placeholder="🔍 Search by title, author, or genre..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-iba-red focus:outline-none text-lg"
+            />
+          </div>
 
           {loading && (
             <div className="text-center py-12">
@@ -51,13 +71,15 @@ export default function PublicBooks() {
             </div>
           )}
 
-          {!loading && books.length === 0 && (
+          {!loading && filteredBooks.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-600">No books available in the library.</p>
+              <p className="text-gray-600">
+                {search ? `No books found for "${search}"` : "No books available in the library."}
+              </p>
             </div>
           )}
 
-          {!loading && books.length > 0 && (
+          {!loading && filteredBooks.length > 0 && (
             <div className="bg-white shadow-md rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="min-w-full">
@@ -73,7 +95,7 @@ export default function PublicBooks() {
                     </tr>
                   </thead>
                   <tbody>
-                    {books.map((book, index) => (
+                    {filteredBooks.map((book, index) => (
                       <tr
                         key={book.BOOK_ID || index}
                         className="border-t border-gray-200 hover:bg-gray-50 transition"

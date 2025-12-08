@@ -23,7 +23,6 @@ import ViewBorrows from "./pages/librarian/viewBorrows";
 import AdminDashboard from "./pages/admin/adminDashboard";
 import AdminViewBorrows from "./pages/admin/viewBorrows";
 import Inventory from "./pages/admin/inventory";
-import RecentActivities from "./pages/admin/recentActivities";
 import Registrations from "./pages/admin/registrations";
 import ManageFines from "./pages/admin/manageFines";
 
@@ -58,7 +57,6 @@ function App() {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/borrows" element={<AdminViewBorrows />} />
           <Route path="/admin/inventory" element={<Inventory />} />
-          <Route path="/admin/activities" element={<RecentActivities />} />
           <Route path="/admin/registrations" element={<Registrations />} />
           <Route path="/admin/manage-fines" element={<ManageFines />} />
         </Routes>

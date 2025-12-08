@@ -75,38 +75,6 @@ export const getBorrows = async (req, res) => {
   }
 };
 
-export const getRecentActivities = async (req, res) => {
-  try {
-    // Query recent activities from BORROW table
-    const result = await query(
-      `SELECT 
-         b.borrow_id,
-         b.status,
-         b.issue_date AS timestamp,
-         s.first_name || ' ' || s.last_name AS user_name,
-         'student' AS role,
-         CASE 
-           WHEN b.status = 'ISSUED' THEN 'Book Issued'
-           WHEN b.status = 'RETURNED' THEN 'Book Returned'
-           WHEN b.status = 'PENDING' THEN 'Borrow Request'
-           ELSE b.status
-         END AS action,
-         'Book: ' || bk.title || ' by ' || bk.author AS details
-       FROM BORROW b
-       JOIN STUDENTS s ON b.erp_id = s.erp_id
-       JOIN BOOKS bk ON b.book_id = bk.book_id
-       WHERE b.issue_date IS NOT NULL OR b.status = 'PENDING'
-       ORDER BY NVL(b.issue_date, SYSDATE) DESC
-       FETCH FIRST 20 ROWS ONLY`
-    );
-
-    res.json(result.rows);
-  } catch (err) {
-    console.error("❌ Recent activities error:", err);
-    res.status(500).json({ error: err.message });
-  }
-};
-
 // Get pending user registrations
 export const getPendingRegistrations = async (req, res) => {
   try {

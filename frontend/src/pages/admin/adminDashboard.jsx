@@ -22,13 +22,6 @@ export default function AdminDashboard() {
       color: "bg-green-500",
     },
     {
-      title: "Recent Activities",
-      description: "Monitor librarian & student actions",
-      icon: "📊",
-      path: "/admin/activities",
-      color: "bg-purple-500",
-    },
-    {
       title: "Registrations",
       description: "Approve/reject new user signups",
       icon: "✅",
