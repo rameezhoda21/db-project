@@ -38,6 +38,18 @@ BEGIN
             RAISE_APPLICATION_ERROR(-20001, 'You have an outstanding fine of Rs ' || v_fine_due || '. Please pay fines before borrowing.');
         END IF;
 
+        -- Check if student already has this book borrowed (PENDING or ISSUED)
+        SELECT COUNT(*)
+        INTO v_active_borrows
+        FROM BORROW
+        WHERE erp_id = :NEW.erp_id
+          AND book_id = :NEW.book_id
+          AND status IN ('PENDING', 'ISSUED');
+
+        IF v_active_borrows > 0 THEN
+            RAISE_APPLICATION_ERROR(-20004, 'You have already borrowed this book. Please return it before borrowing again.');
+        END IF;
+
         -- Check max borrow limit (count PENDING + ISSUED books)
         SELECT COUNT(*)
         INTO v_active_borrows

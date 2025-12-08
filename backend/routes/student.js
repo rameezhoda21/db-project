@@ -49,6 +49,10 @@ router.post("/borrow", async (req, res) => {
       // Fine error - extract the message after ORA-20001:
       const match = errorMessage.match(/ORA-20001:\s*(.+?)(?:\n|ORA-|$)/);
       errorMessage = match ? match[1].trim() : "You have outstanding fines. Please pay fines before borrowing.";
+    } else if (errorMessage.includes('ORA-20004')) {
+      // Already borrowed same book error
+      const match = errorMessage.match(/ORA-20004:\s*(.+?)(?:\n|ORA-|$)/);
+      errorMessage = match ? match[1].trim() : "You have already borrowed this book.";
     } else if (errorMessage.includes('ORA-20003')) {
       // Max borrow limit error
       const match = errorMessage.match(/ORA-20003:\s*(.+?)(?:\n|ORA-|$)/);
