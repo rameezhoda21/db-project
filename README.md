@@ -85,17 +85,21 @@ Frontend will run on: `http://localhost:3000`
 
 ## 👥 Default Login Credentials
 
-### Student
-- **Email**: `hasan.imam@khi.iba.edu.pk`
-- **Password**: `12345678`
-
-### Librarian
-- **Email**: `librarian@gmail.com`
-- **Password**: `12345678`
-
 ### Admin
-- **Email**: `admin@gmail.com`
-- **Password**: `12345678`
+- **loginwithid**: `1`
+- **Password**: `admin123`
+
+### Librarian (Choose any one)
+- **Email**: `sara.ahmed@iba.edu.pk` / **Password**: `lib123`
+- **Email**: `ali.khan@iba.edu.pk` / **Password**: `lib123`
+- **Email**: `fatima.malik@iba.edu.pk` / **Password**: `lib123`
+
+### Student (Choose any one)
+- **ERP**: `22001` / **Email**: `ahmed.hassan@khi.iba.edu.pk` / **Password**: `pass123`
+- **ERP**: `22002` / **Email**: `ayesha.siddiqui@khi.iba.edu.pk` / **Password**: `pass123`
+- **ERP**: `22003` / **Email**: `usman.raza@khi.iba.edu.pk` / **Password**: `pass123`
+- **ERP**: `22004` / **Email**: `zainab.ali@khi.iba.edu.pk` / **Password**: `pass123`
+- **ERP**: `22005` / **Email**: `hassan.mahmood@khi.iba.edu.pk` / **Password**: `pass123`
 
 ---
 
