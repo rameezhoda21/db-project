@@ -57,4 +57,10 @@ app.get("/api/testbooks", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-app.listen(5000, () => console.log("🚀 Server running on port 5000"));
+
+// Conditionally listen if not on Vercel
+if (process.env.NODE_ENV !== "production") {
+  app.listen(5000, () => console.log("🚀 Server running on port 5000"));
+}
+
+export default app;

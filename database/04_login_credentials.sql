@@ -44,6 +44,7 @@ INSERT INTO STUDENTS(erp_id, first_name, last_name, email, pass, fine_due)
 VALUES (22005, 'Hassan', 'Mahmood', 'hassan.mahmood@khi.iba.edu.pk', 'pass123', 0.00);
 
 COMMIT;
+select * from students;
 
 -- ============================================================================
 -- NO BOOKS, NO BORROWS, NO FINES

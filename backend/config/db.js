@@ -9,9 +9,6 @@ try {
   if (libDir) {
     oracledb.initOracleClient({ libDir });
     console.log(`✅ Oracle Client initialized with libDir: ${libDir}`);
-  } else {
-    oracledb.initOracleClient();
-    console.log("✅ Oracle Client initialized (auto-detected)");
   }
 } catch (err) {
   console.error("⚠️ Could not initialize Oracle Client:", err.message);
